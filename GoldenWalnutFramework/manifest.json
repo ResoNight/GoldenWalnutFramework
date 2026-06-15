@@ -6,5 +6,5 @@
         "UniqueID": "ResoNight.GoldenWalnutFramework",
         "EntryDll": "GoldenWalnutFramework.dll",
         "MinimumApiVersion": "4.0.0",
-        "UpdateKeys": [ "Nexus:???" ]
+        "UpdateKeys": [ "GitHub:ResoNight/GoldenWalnutFramework" ]
 }
