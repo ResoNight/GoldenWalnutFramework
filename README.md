@@ -6,14 +6,14 @@ And you can add new Parrot Upgrade Perches (The Parrots that sit on a stick and 
 
 ## Contents
 * [Installation](#installation)
-* [Setting up your Mod](#setting-up-your-mod)
+* [Setting up your Content Pack](#setting-up-your-content-pack)
 * [Having multiple Content Packs in one folder](#having-multiple-content-packs-in-one-folder)
 * [General](#general)
-* [GoldenWalnuts](#golden-walnuts)
+* [GoldenWalnuts](#goldenwalnuts)
   * [Hint](#hint)
   * [Singular](#singular)
     * [Language Token](#language-token)
-  * [Walnut ID](#id)
+  * [ID](#id)
   * [Type](#type)
     * [Bush](#bush)
     * [Buried](#buried)
@@ -102,7 +102,26 @@ The Basic structure for Golden Walnuts looks like this:
   ...
 }
 ```
-the first important thing is the hint.
+For each Walnut, there are those fields:
+Field|Value|Description
+-----|-----|-----------
+[ID](#id) | string | A unique ID for walnuts. Walnuts with type [Bush](#bush) do not have an ID. IDs can be generated automatically (see below at [AutomaticWalnutIDs](#automaticwalnutids))
+[Type](#type) | string | The type can either be [Bush](#bush), [Buried](#buried), [Fishing](#fishing), [Stone](#stone), [MonsterLoot](#monsterloot) or [Custom](#custom)
+[Location](#location) | string | The Location of the Walnut
+[X](x-&-y) | int | The X-Coordinate of the Walnut
+[Y](x-&-y) | int | The Y-Coordinate of the Walnut
+[Width](#width-&-height) | int | The width for the area in that the Walnut is obtainable
+[Height](#width-&-height) | int | The height for the area in that the Walnut is obtainable
+[ExtraTiles](#extratiles) | List with different elements (see at [ExtraTiles](#extratiles)) | additional areas in that the Walnut is obtainable (so you can assign a more specific area than just one rectangle)
+[Chance](#chance) | int | The chance for the Walnut to drop. The number must be between 0 and 1.
+[Count](#count) | int | The amount of walnuts that can be dropped from this Walnut entry. (assigning a Count will change the [ID](#id))
+[DropAtOnce](#dropatonce) | [int, int] | The amount of walnuts that will be dropped at once. Cannot exceed the given [Count](#count)
+[StoneTypes](#stonetypes) | [int or string, int or string, ...] | if assigned, only the given StoneTypes can drop a Walnut. To get a list of all possible values, use the [Console Command](#console-commands) [ShowStoneTypeIDs](#showstonetypeids). Supports custom Stone Types
+[MonsterTypes](#monstertypes) | [int or string, int or string, ...] | if assigned, only the given MonsterTypes can drop a Walnut. To get a list of all possible values, open the Data/Monsters file of the game. The entries on the **left** side are the possible values. Or lookup this [table](https://stardewvalleywiki.com/Modding:Monster_data#Monster_IDs) on the Stardew Valley Wiki. The entries on the **right** side are possible values
+[Condition](#secret-notes-and-conditions) | string | a [MailFlag](https://stardewvalleywiki.com/Modding:Mail_data#Mail_flags) after that the Walnut becomes obtainable, for example after reading a [Secret Note](#secret-notes-and-conditions)
+[Singular](#singular) | string | lets you assign a singular form for the [Hint](#hint), if the player only has one remaining Walnut under the Hint. This is a very special field, read below at [Singular](#singular)
+
+The only always **mandatory** field is the [type](#type). Each Walnut type has a different set of possible fields that you can assign, for example for [Bush](#bush) type Walnuts, you cannot assign an [ID](walnut-id), [MonsterLoot](#monsterloot) type Walnuts are the only type that supports the [MonsterTypes](#monstertypes) field and so on. Look for each type which kind of entries are possible and which are not.
 
 ## Hint
 As you can see [above](#goldenwalnuts), each **Golden Walnut** that you add is part of a **Walnut Group** under a **Hint**. The Hint is what you can see when you
