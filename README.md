@@ -37,7 +37,7 @@ And you can add new Parrot Upgrade Perches (The Parrots that sit on a stick and 
   * [FromFile, FromArea, ToArea](#fromfile,-fromarea,-toarea)
   * [Condition](#condition)
 * [Settings](#settings)
-  * [Synchronize with Content Patcher](#synchronize-with-content-patcher)
+  * [ModID & Content Patcher Compatibility](#modid-&-content-patcher-compatibility)
   * [AutomaticWalnutIDs](#automaticwalnutids)
   * [SeparateHints](#separatehints)
   * [MailFlagsForUsedWalnuts](#mailflagsforusedwalnuts) <- this one is important
@@ -81,25 +81,25 @@ manifest.json must have the same length, or otherwise SMAPI will overlook the ma
 Now you can start writing stuff into your **content.json**. There are a few things I want to mention before you jump into adding your new entries. The [Contents](#contents)
 field above roughly matches the structure that your content.json will have. IDs work in a pretty unusual way, so please read [Walnut ID](#walnut-ids) and the Setting
 [AutomaticWalnutIDs](#automaticwalnutids). Also if you have a Content Pack for Content Patcher (which you most likely have), please look into 
-[Synchronizing with Content Patcher](synchronize-with-content-patcher) before you do anything else. Now lets get started with **GoldenWalnuts!**
+[ModID & Content Patcher Compatibility](#modid-&-content-patcher-compatibility) before you do anything else. If you are testing your implemented Walnuts, I have a bunch of error logs, so you can't do anything wrong. All entries will be checked when you start the game and they will be checked again, if you load into a save. The check for your [Location](#location) entry can only happen after loading into a save. If you are adding/changing entries in your content.json, you don't need to fully close the game and reopen it. You can just exit the save and re-enter it. You will get a little warning into your SMAPI console, when you add or remove a new [Walnut Group](#hint), but don't worry, your collected Walnut Count will just be off a bit. After restarting, it will always be correct then. Now lets get started with **GoldenWalnuts!**
 
 ## GoldenWalnuts
 The Basic structure for Golden Walnuts looks like this:
 ```
 "GoldenWalnuts": {
-  "Hint1": [
-    {
-      //entries for walnut 1
-    },
-    {
-      //entries for walnut 2
-    },
+    "Hint1": [
+        {
+            //entries for walnut 1
+        },
+        {
+            //entries for walnut 2
+        },
+        ...
+    ],
+    "Hint2": [
+        ...
+    ],
     ...
-  ],
-  "Hint2": [
-    ...
-  ],
-  ...
 }
 ```
 For each Walnut, there are those fields:
@@ -142,6 +142,60 @@ would automatically turn into this, when talking to the Parrot:
 For those hints in specific, concernedApe always wrote them in a way so that the **singular** and **plural** form
 are the same. So he never wrote f.e. `{0} Walnuts in the Ocean...`, since this could say `1 Walnuts in the Ocean...`. However, I just added a way so you can
 write a [singular](#singular) form that will be shown instead, when you have 1 Walnut remaining of this group. The Hint field and the [Singular](#singular)
-field are the only ones, that support the [Language Token](#language-token). The Setting [SeparateHints](#separatehints) might also be interesting for you.
+field are the only ones, that support the [Language Token](#language-token). The Setting [SeparateHints](#separatehints) might also be interesting for you. One last thing, don't make your hints too long or they might go **off screen**!
 
 ## Singular
+If your [Hint](#hint) contains a `{0}` and you want to have a singular form of the string, when the player has only one remaining Walnut in this group, you can assign the Singular field. To use this field, your first "Walnut" entry must be just the field for singular. So it should look like this:
+```
+"YourHint": [
+    {
+        "Singular": "YourHintInSingularForm"
+    },
+    {
+        //entries for Walnut 1
+    },
+    {
+        //entries for Walnut 2
+    },
+    ...
+]
+```
+The Singular field also supports the [Language Token](#language-token). This field technically also supports `{0}`, but this will always be replaced with 1, since this will only be shown if you have 1 walnut remaining.
+
+## Language Token
+For the [Hint](#hint) and its [Singular](#singular) form, you can use the language token, that works similar to how [Content Patcher's language token](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/tokens.md#i18n) works. The token looks like this: `{{i18n:...}}` and for the ..., you enter the keyword that you are using in your language files. So to set everything up, create a new **Folder** called `i18n` next to your content and manifest files. In this foldeer, you add a default.json for english and then you add a file for each language that you want to add. The language files must be the language code with .json behind it, so `de.json` for german, `es.json` for spanish and so on (See the [Translation Guide](https://stardewvalleywiki.com/Modding:Translations) on the Stardew Valley Wiki). In those files, you add the keyword that you used in your token. So for example, if you have this:
+```
+"{{i18n:Buried_North}}": [
+    {
+        "Singular": {{i18n:Buried_North_S}}
+    },
+    ...
+]
+```
+then your default.json would look like this:
+```
+{
+    "Buried_North": "{0} Golden Walnuts buried in the north...",
+    "Buried_North_S": "1 Golden Walnut buried in the north..."
+}
+```
+and your, lets say de.json would look like this:
+```
+{
+    "Buried_North": "{0} Walnüsse vergraben im Norden...",
+    "Buried_North_S": "1 Walnuss vergraben im Norden..."
+}
+```
+If you didn't add the language file the player currently uses or the language file is missing the entry for the hint that the game tries to show the player, it will just look for the entry in the default.json instead. So don't worry about missing entries or missing language files!
+
+## ID
+The ID for Golden Walnuts works in a unique way and has some edge cases. The ID that you assign here is the ID that will be added under `Game1.player.team.collectedNutTracker`. IDs should be assigned as unique as possible, so using the `{{ModID}}` token is strongly advised (see below at [ModID & Content Patcher Compatibility](#modid-&-content-patcher-compatibility)). Bushes cannot have a custom ID, because it needs a specific ID structure, so the game can connect a Walnut to a Walnut Bush. So Bushes' ID will automatically be this: `Bush_Location_X_Y`. If you assigned a [Count](#count) to a Walnut that is 2 or higher, each individual Walnut will automatically have its own ID. So if you have, lets say, Count set to 3 and your ID is "TestID", the IDs of those Walnuts will be: `TestID_1`, `TestID_2` and `TestID_3`. This is especially important if you assign a Walnut with the [Type](#type) [Custom](#custom), since you need to add the right IDs to your collectedNutTracker. You can also activate [AutomaticWalnutIDs](#automaticwalnutids) so you don't have to write an ID for each Walnut that you add ([Custom](#custom) Type Walnuts must **always** have an ID assigned to them).
+
+## Type
+There are a total of 6 Types that a Walnut can have. Each type has different fields that it **must** have, **can** have and **cannot** have. I will go through them one by one.
+
+# Bush
+
+
+
+
