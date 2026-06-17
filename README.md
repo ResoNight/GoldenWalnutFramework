@@ -197,6 +197,13 @@ There are a total of 6 Types that a Walnut can have. Each type has different fie
 # Bush
 ![Indoors Bush](docs/images/Example_Bush_Indoors.png)
 
+Possible Fields|Status
+---------------|------
+[Type](#type) | required
+[Location](#location) | required
+[X](#x-&-y) | required
+[Y](#x-&-y) | required
+
 Example:
 ```
 {
@@ -207,17 +214,20 @@ Example:
 }
 ```
 
-Possible Fields|Status
----------------|------
-[Type](#type) | required
-[Location](#location) | required
-[X](#x-&-y) | required
-[Y](#x-&-y) | required
-
 A **Bush** must always have those fields and cannot have any other than that. You cannot assign an [ID](#id) for Bushes, since I need to automatically generate the ID so that the game can connect the Walnut to the Bush. For this example, the ID of the Walnut would be `Bush_Sunroom_3_7`. On the Paths TileSheet when creating maps, there is a tile that lets you spawn in Walnut Bushes. ***DO NOT USE THIS!*** Adding a Walnut with Type Bush will spawn it in automatically. When you place them yourself, the Framework cannot keep track of them! What you can do though is place the tile with index 7 from the paths TileSheet on the Paths layer (see [Paths Layer](https://stardewvalleywiki.com/Modding:Maps#Paths_layer) on the Wiki). This is a tile that does not have any effect at all, so it is good for yourself to keep track, where you placed Bushes. One more thing, just like normal Bushes, spawning a Bush once will let it stay in the save file. However, you don't have to worry about that. You will occasionally see a `x Bushes removed` in the console, since GWF automatically removes any Walnut Bushes that have been placed using the framework, but don't have any matching entry currently.
 
 # Buried
 ![Buried in Town](docs/images/Example_Buried_Town.png)
+
+Possible Fields|Status
+---------------|------
+[ID](#id) | required (optional if [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
+[Type](#type) | always required
+[Location](#location) | always required
+[X](#x-&-y) | always required
+[Y](#x-&-y) | always required
+[Count](#count) | optional
+[Condition](#secret-notes-and-conditions) | optional
 
 Example:
 ```
@@ -230,20 +240,24 @@ Example:
 }
 ```
 
-Possible Fields|Status
----------------|------
-[ID](#id) | required (unless [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
-[Type](#type) | required
-[Location](#location) | required
-[X](#x-&-y) | required
-[Y](#x-&-y) | required
-[Count](#count) | optional
-[Condition](#secret-notes-and-conditions) | optional
-
 A **Buried Walnut** works pretty much exactly how you think it would work. If you assign a Count, all those Walnuts will be dropped at once. Especially for buried walnuts, the *Condition* field might be very useful to f.e. only let a walnut be dropped *after* the player has read a **Secret Note**. GWF does *not* provide a framework for Secret Notes, so see below at [Secret Notes and Conditions](#secret-notes-and-conditions). Keep in mind that the tile for your walnut must be *diggable*.
 
 ## Fishing
 ![Fishing at Log in Mountain](docs/images/Example_Fishing_Log.png)
+
+Possible Fields|Status
+---------------|------
+[ID](#id) | required (optional if [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
+[Type](#type) | always required
+[Location](#location) | always required
+[X](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Y](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Width](#width-&-height) | optional
+[Height](#width-&-height) | optional
+[ExtraTiles](#extratiles) | optional
+[Count](#count) | optional
+[Chance](#chance) | optional
+[Condition](#secret-notes-and-conditions) | optional
 
 Example:
 ```
@@ -260,17 +274,37 @@ Example:
 }
 ```
 
+Fishing Type Walnuts can either be fished across a whole map or they can be in specific areas. With the [X & Y](#x-&-y) Coordinates as wellas the [Width](#width-&-height) and [Height](#width-&-height), you can assign a rectangle in that the walnut can be fished. If you need a more specific area, you can use the field [ExtraTiles](#extratiles). If you assign a [Count](#count) and the last Walnut is being fished, the game will play a small soundeffect, so that the player knows, that he has all walnuts of this kind. The [DropAtOnce](#dropatonce) feature unfortunately does not work for **Fishing** type walnuts, since you are actively fishing one walnut instead of x walnuts being dropped into the world. For the [Chance](#chance), please keep in mind that the player is fishing pretty slowly and you can only fish one at a time. So whereas a 0.05 chance for a [Stone](#stone) type Walnut in a larger quarry would be perfectly reasonable, a 0.05 chance for fishing, especially if you assign a Count like 5, would be terrifyingly frustrating. So, in short, think of what you are doing and always think of the unlucky ones :) You can also assign a Condition (see below at [Secret Notes and Conditions](#secret-notes-and-conditions)).
+
+## Stone
+![Stone in MountainQuarry](docs/images/Example_Stone_Mountain.png)
+
 Possible Fields|Status
 ---------------|------
-[ID](#id) | required (unless [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
-[Type](#type) | required
-[Location](#location) | required
-[X](#x-&-y) | required
-[Y](#x-&-y) | required
+[ID](#id) | required (optional if [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
+[Type](#type) | always required
+[Location](#location) | always required
+[X](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Y](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
 [Width](#width-&-height) | optional
 [Height](#width-&-height) | optional
 [ExtraTiles](#extratiles) | optional
 [Count](#count) | optional
+[DropAtOnce](#dropatonce) | optional
 [Chance](#chance) | optional
+[StoneTypes](#stonetypes) | optional
 [Condition](#secret-notes-and-conditions) | optional
 
+Example:
+```
+{
+    "ID": "{{ModID}}_MountainQuarry",
+    "Type": "Stone",
+    "Location": "Mountain",
+    "Chance": 0.05,
+    "Count": 10,
+    "DropAtOnce": [1, 3]
+}
+```
+
+This type causes Stones to drop Walnuts if you break them in any way, just like the MusselStones on IslandWest. You can assign a **rectangle** using [X, Y](#x-&-y), [Width](#width-&-height) and [Height](#width-&-height). If you need a more specific area, you can use the field [ExtraTiles](#extratiles). If you leave all of them out, the area will just be the whole map. If you assign a Count, the game will play a soundeffect whenever the player collects the last walnut of this kind. For Stones, you can also assign the DropAtOnce field. Whenever the Stone is going to drop Walnuts, it will drop a random amount of walnuts between your left and right number. So in the case of the example, a stone will drop 1, 2 or 3 walnuts at once. However, the [Count](#count) you assigned will always be the upper limit. So for example if you assign something like this: `"DropAtOnce": [3, 5]` with the Count 10 and 9 out of 10 Walnuts have already been dropped, the last Stone will forcefully drop only 1 Walnut. There is also the field [StoneTypes](#stonetypes) which, when set, only lets the given Stones drop Walnuts, including Custom Stones (see below at [StoneTypes](#stonetypes). For the [Chance](#chance) field, you should really think about how you are going to set this. You have to consider the size of your quarry, the amount of stones that can drop walnuts, the amount that can be dropped at once and the bad luck of some players. For example my example from above was actually not that good. Upon testing, in 10 out of 10 cases with a full quarry, I got the 10 Walnuts, often with the very first bomb. So for above's example, I would completely leave out DropAtOnce and then I would say it would be decently balanced. So maybe you want to go out and just test, what Chance you want to set. This Walnut Type also supports the Condition field (see below at [Secret Notes and Conditions](#secret-notes-and-conditions)).
