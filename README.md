@@ -196,6 +196,7 @@ There are a total of 6 Types that a Walnut can have. Each type has different fie
 
 # Bush
 ![Indoors Bush](docs/images/Example_Bush_Indoors.png)
+
 Example:
 ```
 {
@@ -205,6 +206,71 @@ Example:
     "Y": 7
 }
 ```
-A Bush must always have those fields and cannot have any other than that. You cannot assign an [ID](#id) for Bushes, since I need to automatically generate the ID so that the game can connect the Walnut to the Bush. For this example, the ID of the Walnut would be `Bush_Sunroom_3_7`. 
 
+Possible Fields|Status
+---------------|------
+[Type](#type) | required
+[Location](#location) | required
+[X](#x-&-y) | required
+[Y](#x-&-y) | required
+
+A **Bush** must always have those fields and cannot have any other than that. You cannot assign an [ID](#id) for Bushes, since I need to automatically generate the ID so that the game can connect the Walnut to the Bush. For this example, the ID of the Walnut would be `Bush_Sunroom_3_7`. On the Paths TileSheet when creating maps, there is a tile that lets you spawn in Walnut Bushes. ***DO NOT USE THIS!*** Adding a Walnut with Type Bush will spawn it in automatically. When you place them yourself, the Framework cannot keep track of them! What you can do though is place the tile with index 7 from the paths TileSheet on the Paths layer (see [Paths Layer](https://stardewvalleywiki.com/Modding:Maps#Paths_layer) on the Wiki). This is a tile that does not have any effect at all, so it is good for yourself to keep track, where you placed Bushes. One more thing, just like normal Bushes, spawning a Bush once will let it stay in the save file. However, you don't have to worry about that. You will occasionally see a `x Bushes removed` in the console, since GWF automatically removes any Walnut Bushes that have been placed using the framework, but don't have any matching entry currently.
+
+# Buried
+![Buried in Town](docs/images/Example_Buried_Town.png)
+
+Example:
+```
+{
+    "ID": "{{ModID}}_Buried_Town_01"
+    "Type": "Buried",
+    "Location": "Town",
+    "X": 25,
+    "Y": 51
+}
+```
+
+Possible Fields|Status
+---------------|------
+[ID](#id) | required (unless [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
+[Type](#type) | required
+[Location](#location) | required
+[X](#x-&-y) | required
+[Y](#x-&-y) | required
+[Count](#count) | optional
+[Condition](#secret-notes-and-conditions) | optional
+
+A **Buried Walnut** works pretty much exactly how you think it would work. If you assign a Count, all those Walnuts will be dropped at once. Especially for buried walnuts, the *Condition* field might be very useful to f.e. only let a walnut be dropped *after* the player has read a **Secret Note**. GWF does *not* provide a framework for Secret Notes, so see below at [Secret Notes and Conditions](#secret-notes-and-conditions). Keep in mind that the tile for your walnut must be *diggable*.
+
+## Fishing
+![Fishing at Log in Mountain](docs/images/Example_Fishing_Log.png)
+
+Example:
+```
+{
+    "ID": "{{ModID}}_Fishing_Mountain_Log",
+    "Type": "Fishing",
+    "Location": "Mountain",
+    "X": 66,
+    "Y": 31,
+    "Width": 6,
+    "Height": 6,
+    "Chance": 0.25,
+    "Count": 3
+}
+```
+
+Possible Fields|Status
+---------------|------
+[ID](#id) | required (unless [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
+[Type](#type) | required
+[Location](#location) | required
+[X](#x-&-y) | required
+[Y](#x-&-y) | required
+[Width](#width-&-height) | optional
+[Height](#width-&-height) | optional
+[ExtraTiles](#extratiles) | optional
+[Count](#count) | optional
+[Chance](#chance) | optional
+[Condition](#secret-notes-and-conditions) | optional
 
