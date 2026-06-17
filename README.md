@@ -195,7 +195,7 @@ The ID for Golden Walnuts works in a unique way and has some edge cases. The ID 
 There are a total of 6 Types that a Walnut can have. Each type has different fields that it **must** have, **can** have and **cannot** have. I will go through them one by one.
 
 # Bush
-
+![Indoors Bush](docs/images/Example_Bush_Indoors.png)
 Example:
 ```
 {
