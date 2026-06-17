@@ -308,3 +308,37 @@ Example:
 ```
 
 This type causes Stones to drop Walnuts if you break them in any way, just like the MusselStones on IslandWest. You can assign a **rectangle** using [X, Y](#x-&-y), [Width](#width-&-height) and [Height](#width-&-height). If you need a more specific area, you can use the field [ExtraTiles](#extratiles). If you leave all of them out, the area will just be the whole map. If you assign a Count, the game will play a soundeffect whenever the player collects the last walnut of this kind. For Stones, you can also assign the DropAtOnce field. Whenever the Stone is going to drop Walnuts, it will drop a random amount of walnuts between your left and right number. So in the case of the example, a stone will drop 1, 2 or 3 walnuts at once. However, the [Count](#count) you assigned will always be the upper limit. So for example if you assign something like this: `"DropAtOnce": [3, 5]` with the Count 10 and 9 out of 10 Walnuts have already been dropped, the last Stone will forcefully drop only 1 Walnut. There is also the field [StoneTypes](#stonetypes) which, when set, only lets the given Stones drop Walnuts, including Custom Stones (see below at [StoneTypes](#stonetypes). For the [Chance](#chance) field, you should really think about how you are going to set this. You have to consider the size of your quarry, the amount of stones that can drop walnuts, the amount that can be dropped at once and the bad luck of some players. For example my example from above was actually not that good. Upon testing, in 10 out of 10 cases with a full quarry, I got the 10 Walnuts, often with the very first bomb. So for above's example, I would completely leave out DropAtOnce and then I would say it would be decently balanced. So maybe you want to go out and just test, what Chance you want to set. This Walnut Type also supports the Condition field (see below at [Secret Notes and Conditions](#secret-notes-and-conditions)).
+
+## MonsterLoot
+![Slime at Moonscythe Island](docs/images/Example_Slime_MS_Island)
+
+Possible Fields|Status
+---------------|------
+[ID](#id) | required (optional if [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
+[Type](#type) | always required
+[Location](#location) | always required
+[X](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Y](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Width](#width-&-height) | optional
+[Height](#width-&-height) | optional
+[ExtraTiles](#extratiles) | optional
+[Count](#count) | optional
+[DropAtOnce](#dropatonce) | optional
+[Chance](#chance) | optional
+[MonsterTypes](#monstertypes) | optional
+[Condition](#secret-notes-and-conditions) | optional
+
+Example:
+```
+{
+    "ID": "{{ModID}}_Moonscythe_Island_MonsterLoot",
+    "Type": "MonsterLoot",
+    "Location": "{{ModID}}_Moonscythe_Island",
+    "Count": 5,
+    "DropAtOnce": [1, 2],
+    "Chance": 0.25,
+    "MonsterTypes": ["Sludge"]
+}
+```
+
+To make it short, this Type works basically *exactly* like the [StoneTypes](#stonetypes) walnut. Keep in mind, the area that you assign with [X, Y](#x-&-y), [Width](#width-&-height) and [Height](#width-&-height) refers to the last tile on which the monster has been killed, **NOT** where you spawned the monster (since I cannot trace back where a monster has been spawned). You can also specify, which kind of monsters can drop Walnuts by using the [MonsterTypes](#monstertypes) field.
