@@ -195,15 +195,16 @@ The ID for Golden Walnuts works in a unique way and has some edge cases. The ID 
 There are a total of 6 Types that a Walnut can have. Each type has different fields that it **must** have, **can** have and **cannot** have. I will go through them one by one.
 
 # Bush
+
 Example:
 ```
 {
     "Type": "Bush",
     "Location": "Sunroom",
-    "X": 5,
-    "Y": 8
+    "X": 3,
+    "Y": 7
 }
 ```
-A Bush must always have those fields and cannot have any other than that. You cannot assign an [ID](#id) for Bushes, since I need to automatically generate the ID so that the game can connect the Walnut to the Bush. For this example, the ID of the Walnut would be `Bush_Sunroom_5_8`. 
+A Bush must always have those fields and cannot have any other than that. You cannot assign an [ID](#id) for Bushes, since I need to automatically generate the ID so that the game can connect the Walnut to the Bush. For this example, the ID of the Walnut would be `Bush_Sunroom_3_7`. 
 
 
