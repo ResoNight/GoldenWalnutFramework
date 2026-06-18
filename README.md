@@ -22,13 +22,14 @@ And you can add new Parrot Upgrade Perches (The Parrots that sit on a stick and 
     * [MonsterLoot](#monsterloot)
     * [Custom](#custom)
   * [Location](#location)
-  * [X & Y](#x-&-y)
-  * [Width & Height](#width-&-height)
+  * [X and Y](#x-and-y)
+  * [Width and Height](#width-and-height)
   * [ExtraTiles](#extratiles)
   * [Chance](#chance)
-  * [Count](#walnut-count)
+  * [Count](#count)
   * [DropAtOnce](#dropatonce)
   * [StoneTypes](#stonetypes)
+    * [How to add custom Stones](#how-to-add-custom-stones) 
   * [MonsterTypes](#monstertypes)
   * [Secret Notes and Conditions](#secret-notes-and-conditions)
 * [ParrotUpgradePerches](#parrotupgradeperches)
@@ -108,16 +109,16 @@ Field|Value|Description
 [ID](#id) | string | A unique ID for walnuts. Walnuts with type [Bush](#bush) do not have an ID. IDs can be generated automatically (see below at [AutomaticWalnutIDs](#automaticwalnutids))
 [Type](#type) | string | The type can either be [Bush](#bush), [Buried](#buried), [Fishing](#fishing), [Stone](#stone), [MonsterLoot](#monsterloot) or [Custom](#custom)
 [Location](#location) | string | The Location of the Walnut
-[X](x-&-y) | int | The X-Coordinate of the Walnut
-[Y](x-&-y) | int | The Y-Coordinate of the Walnut
-[Width](#width-&-height) | int | The width for the area in that the Walnut is obtainable
-[Height](#width-&-height) | int | The height for the area in that the Walnut is obtainable
+[X](x-and-y) | int | The X-Coordinate of the Walnut
+[Y](x-and-y) | int | The Y-Coordinate of the Walnut
+[Width](#width-and-height) | int | The width for the area in that the Walnut is obtainable
+[Height](#width-and-height) | int | The height for the area in that the Walnut is obtainable
 [ExtraTiles](#extratiles) | List with different elements (see at [ExtraTiles](#extratiles)) | additional areas in that the Walnut is obtainable (so you can assign a more specific area than just one rectangle)
 [Chance](#chance) | int | The chance for the Walnut to drop. The number must be between 0 and 1.
 [Count](#count) | int | The amount of walnuts that can be dropped from this Walnut entry. (assigning a Count will change the [ID](#id))
 [DropAtOnce](#dropatonce) | [int, int] | The amount of walnuts that will be dropped at once. Cannot exceed the given [Count](#count)
 [StoneTypes](#stonetypes) | [int or string, int or string, ...] | if assigned, only the given StoneTypes can drop a Walnut. To get a list of all possible values, use the [Console Command](#console-commands) [ShowStoneTypeIDs](#showstonetypeids). Supports custom Stone Types
-[MonsterTypes](#monstertypes) | [int or string, int or string, ...] | if assigned, only the given MonsterTypes can drop a Walnut. To get a list of all possible values, open the Data/Monsters file of the game. The entries on the **left** side are the possible values. Or lookup this [table](https://stardewvalleywiki.com/Modding:Monster_data#Monster_IDs) on the Stardew Valley Wiki. The entries on the **right** side are possible values
+[MonsterTypes](#monstertypes) | [string, string, ...] | if assigned, only the given MonsterTypes can drop a Walnut. To get a list of all possible values, open the Data/Monsters file of the game. The entries on the **left** side are the possible values. Or lookup this [table](https://stardewvalleywiki.com/Modding:Monster_data#Monster_IDs) on the Stardew Valley Wiki. The entries on the **right** side are possible values
 [Condition](#secret-notes-and-conditions) | string | a [MailFlag](https://stardewvalleywiki.com/Modding:Mail_data#Mail_flags) after that the Walnut becomes obtainable, for example after reading a [Secret Note](#secret-notes-and-conditions)
 [Singular](#singular) | string | lets you assign a singular form for the [Hint](#hint), if the player only has one remaining Walnut under the Hint. This is a very special field, read below at [Singular](#singular)
 
@@ -201,8 +202,8 @@ Possible Fields|Status
 ---------------|------
 [Type](#type) | required
 [Location](#location) | required
-[X](#x-&-y) | required
-[Y](#x-&-y) | required
+[X](#x-and-y) | required
+[Y](#x-and-y) | required
 
 Example:
 ```
@@ -224,8 +225,8 @@ Possible Fields|Status
 [ID](#id) | required (optional if [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
 [Type](#type) | always required
 [Location](#location) | always required
-[X](#x-&-y) | always required
-[Y](#x-&-y) | always required
+[X](#x-and-y) | always required
+[Y](#x-and-y) | always required
 [Count](#count) | optional
 [Condition](#secret-notes-and-conditions) | optional
 
@@ -250,10 +251,10 @@ Possible Fields|Status
 [ID](#id) | required (optional if [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
 [Type](#type) | always required
 [Location](#location) | always required
-[X](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
-[Y](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
-[Width](#width-&-height) | optional
-[Height](#width-&-height) | optional
+[X](#x-and-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Y](#x-and-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Width](#width-and-height) | optional
+[Height](#width-and-height) | optional
 [ExtraTiles](#extratiles) | optional
 [Count](#count) | optional
 [Chance](#chance) | optional
@@ -274,7 +275,7 @@ Example:
 }
 ```
 
-Fishing Type Walnuts can either be fished across a whole map or they can be in specific areas. With the [X & Y](#x-&-y) Coordinates as wellas the [Width](#width-&-height) and [Height](#width-&-height), you can assign a rectangle in that the walnut can be fished. If you need a more specific area, you can use the field [ExtraTiles](#extratiles). If you assign a [Count](#count) and the last Walnut is being fished, the game will play a small soundeffect, so that the player knows, that he got all walnuts of one entry. The [DropAtOnce](#dropatonce) feature unfortunately does not work for **Fishing** type walnuts, since you are actively fishing one walnut instead of x walnuts being dropped into the world. For the [Chance](#chance), please keep in mind that the player is fishing pretty slowly and you can only fish one at a time. So whereas a 0.05 chance for a [Stone](#stone) type Walnut in a larger quarry would be perfectly reasonable, a 0.05 chance for fishing, especially if you assign a Count like 5, would be terrifyingly frustrating. So, in short, think of what you are doing and always think of the unlucky ones :) You can also assign a Condition (see below at [Secret Notes and Conditions](#secret-notes-and-conditions)).
+Fishing Type Walnuts can either be fished across a whole map or they can be in specific areas. With the [X and Y](#x-and-y) Coordinates as wellas the [Width](#width-and-height) and [Height](#width-and-height), you can assign a rectangle in that the walnut can be fished. If you need a more specific area, you can use the field [ExtraTiles](#extratiles). If you assign a [Count](#count) and the last Walnut is being fished, the game will play a small soundeffect, so that the player knows, that he got all walnuts of one entry. The [DropAtOnce](#dropatonce) feature unfortunately does not work for **Fishing** type walnuts, since you are actively fishing one walnut instead of x walnuts being dropped into the world. For the [Chance](#chance), please keep in mind that the player is fishing pretty slowly and you can only fish one at a time. So whereas a 0.05 chance for a [Stone](#stone) type Walnut in a larger quarry would be perfectly reasonable, a 0.05 chance for fishing, especially if you assign a Count like 5, would be terrifyingly frustrating. So, in short, think of what you are doing and always think of the unlucky ones :) You can also assign a Condition (see below at [Secret Notes and Conditions](#secret-notes-and-conditions)).
 
 # Stone
 ![Stone in MountainQuarry](docs/images/Example_Stone_Mountain.png)
@@ -284,10 +285,10 @@ Possible Fields|Status
 [ID](#id) | required (optional if [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
 [Type](#type) | always required
 [Location](#location) | always required
-[X](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
-[Y](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
-[Width](#width-&-height) | optional
-[Height](#width-&-height) | optional
+[X](#x-and-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Y](#x-and-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Width](#width-and-height) | optional
+[Height](#width-and-height) | optional
 [ExtraTiles](#extratiles) | optional
 [Count](#count) | optional
 [DropAtOnce](#dropatonce) | optional
@@ -307,7 +308,7 @@ Example:
 }
 ```
 
-This type causes Stones to drop Walnuts if you break them in any way, just like the MusselStones on IslandWest. You can assign a **rectangle** using [X, Y](#x-&-y), [Width](#width-&-height) and [Height](#width-&-height). If you need a more specific area, you can use the field [ExtraTiles](#extratiles). If you leave all of them out, the area will just be the whole map. If you assign a Count, the game will play a soundeffect whenever the player collects the last walnut from one entry. For Stones, you can also assign the DropAtOnce field. Whenever the Stone is going to drop Walnuts, it will drop a random amount of walnuts between your left and right number. So in the case of the example, a stone will drop 1, 2 or 3 walnuts at once. However, the [Count](#count) you assigned will always be the upper limit. So for example if you assign something like this: `"DropAtOnce": [3, 5]` with the Count 10 and 9 out of 10 Walnuts have already been dropped, the last Stone will forcefully drop only 1 Walnut. There is also the field [StoneTypes](#stonetypes) which, when set, only lets the given Stones drop Walnuts, including Custom Stones (see below at [StoneTypes](#stonetypes). For the [Chance](#chance) field, you should really think about how you are going to set this. You have to consider the size of your quarry, the amount of stones that can drop walnuts, the amount that can be dropped at once and the bad luck of some players. For example my example from above was actually not that good. Upon testing, in 10 out of 10 cases with a full quarry, I got the 10 Walnuts, often with the very first bomb. So for above's example, I would completely leave out DropAtOnce and then I would say it would be decently balanced. So maybe you want to go out and just test, what Chance you want to set. This Walnut Type also supports the Condition field (see below at [Secret Notes and Conditions](#secret-notes-and-conditions)).
+This type causes Stones to drop Walnuts if you break them in any way, just like the MusselStones on IslandWest. You can assign a **rectangle** using [X, Y](#x-and-y), [Width](#width-and-height) and [Height](#width-and-height). If you need a more specific area, you can use the field [ExtraTiles](#extratiles). If you leave all of them out, the area will just be the whole map. If you assign a Count, the game will play a soundeffect whenever the player collects the last walnut from one entry. For Stones, you can also assign the DropAtOnce field. Whenever the Stone is going to drop Walnuts, it will drop a random amount of walnuts between your left and right number. So in the case of the example, a stone will drop 1, 2 or 3 walnuts at once. However, the [Count](#count) you assigned will always be the upper limit. So for example if you assign something like this: `"DropAtOnce": [3, 5]` with the Count 10 and 9 out of 10 Walnuts have already been dropped, the last Stone will forcefully drop only 1 Walnut. There is also the field [StoneTypes](#stonetypes) which, when set, only lets the given Stones drop Walnuts, including Custom Stones (see below at [StoneTypes](#stonetypes). For the [Chance](#chance) field, you should really think about how you are going to set this. You have to consider the size of your quarry, the amount of stones that can drop walnuts, the amount that can be dropped at once and the bad luck of some players. For example my example from above was actually not that good. Upon testing, in 10 out of 10 cases with a full quarry, I got the 10 Walnuts, often with the very first bomb. So for above's example, I would completely leave out DropAtOnce and then I would say it would be decently balanced. So maybe you want to go out and just test, what Chance you want to set. This Walnut Type also supports the Condition field (see below at [Secret Notes and Conditions](#secret-notes-and-conditions)).
 
 # MonsterLoot
 ![Slime at Moonscythe Island](docs/images/Example_Slime_MS_Island.png)
@@ -317,10 +318,10 @@ Possible Fields|Status
 [ID](#id) | required (optional if [automaticWalnutIDs](#automaticWalnutIDs) is enabled)
 [Type](#type) | always required
 [Location](#location) | always required
-[X](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
-[Y](#x-&-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
-[Width](#width-&-height) | optional
-[Height](#width-&-height) | optional
+[X](#x-and-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Y](#x-and-y) | optional (required for [automaticWalnutID](#automaticWalnutIDs))
+[Width](#width-and-height) | optional
+[Height](#width-and-height) | optional
 [ExtraTiles](#extratiles) | optional
 [Count](#count) | optional
 [DropAtOnce](#dropatonce) | optional
@@ -341,7 +342,7 @@ Example:
 }
 ```
 
-To make it short, this Type works basically *exactly* like the [StoneTypes](#stonetypes) walnut. Keep in mind, the area that you assign with [X, Y](#x-&-y), [Width](#width-&-height) and [Height](#width-&-height) refers to the last tile on which the monster has been killed, **NOT** where you spawned the monster (since I cannot trace back where a monster has been spawned). You can also specify, which kind of monsters can drop Walnuts by using the [MonsterTypes](#monstertypes) field.
+To make it short, this Type works basically *exactly* like the [StoneTypes](#stonetypes) walnut. Keep in mind, the area that you assign with [X, Y](#x-and-y), [Width](#width-and-height) and [Height](#width-and-height) refers to the last tile on which the monster has been killed, **NOT** where you spawned the monster (since I cannot trace back where a monster has been spawned). You can also specify, which kind of monsters can drop Walnuts by using the [MonsterTypes](#monstertypes) field. One more thing, I hope this is already clear, but if you f.e. spawn in monsters using [FarmTypeManager](https://github.com/Esca-MMC/FarmTypeManager), ***DO NOT*** add a Walnut as loot. This framework handles the loot on its own, you don't need to add it
 
 # Custom
 ![Fountain at Farming Island](docs/images/Example_Fountain_F_Island.png)
@@ -428,10 +429,10 @@ As you can see, I really want to make sure that you do it the right way XD. If y
 # Location
 For the location field, there are a few things to keep in mind. First, whenever you start the game, you can already see an error for each entry. The location entry is the only thing that can check for errors after you loaded into a save, since GWF needs to check for existing locations. For the location field, you need to add the name that the in-game location has, NOT the name of its file. So for example there is the file `Island_N`, but the location is named `IslandNorth` and you need to write *IslandNorth* into the locations field. If you don't know the name of a location, there are a few ways to find the name. First, you can go into the Data/Maps field and actively look for the name in there. But this can be a bit annoying sometimes. So if you have the Mod FarmTypeManager installed, you can just go to the location and type `whereami` into the console and it will tell you the name of the location. Or probably the easiest way, you look at this [table](https://stardewvalleywiki.com/Modding:Location_data#Location_names) from the Wiki. Everything about the location entry is similar for the Locations field for [Golden Walnuts](#goldenwalnuts) and for [Parrot Upgrade Perches](#parrotupgradeperches).
 
-# X & Y
+# X and Y
 Those two fields are pretty self-explanatory. However, one good thing to know, is, that if you have [AutomaticWalnutIDs](#automaticwalnutids) enabled, those two fields become necessary, since the generated ID is always this: `ModID_Type_Location_X_Y`.
 
-# Width & Height
+# Width and Height
 With the Width and Height, you can specify an area for a walnut in that it can be dropped. Just keep in mind that if for example your X coordinate is 40 and you want the area to reach up to 45, your Width must be 6 and not 5, since the X coordinate itself also has Width 1 basically. The rest should be self-explanatory
 
 # ExtraTiles
@@ -452,7 +453,7 @@ This field lets you add extra areas, if your designated area cannot just be a re
     ...
 ]
 ```
-For each {}, you can assign the [X & Y](x-&-y) coordinates and optionally also the [Width & Height](#width-&-height). If one of those or both are omitted, they just default to 1.
+For each {}, you can assign the [X and Y](x-and-y) coordinates and optionally also the [Width and Height](#width-and-height). If one of those or both are omitted, they just default to 1.
 
 # Chance
 The chance is a number between 0 and 1. Genuinely think about what chance you can assign, it can quickly get frustrating, if someone is unlucky. And if many people play your mod, there *will* be unlucky people. For Fishing walnuts especially, you shouldn't make the chance too low, because you have to actively spent a ton of ingame time to get a chance one by one, whereas for monsters and stones, you can quickly go in, kill them once or destroy them once and then you got your chance for today, so fishing is generally much more frustrating than the other types.
@@ -469,7 +470,119 @@ So for example this:
 
 `[1, 3]`
 
-Even if you always drop the same amount, please also write it like this: `[2, 2]`. The [Count](#count) field always has priority over the DropAtOnce field. This means, if you'd assign for example this: `[3, 3]` and your Count is 10, the first three stones or monster or whatever would drop 3 Walnuts and the last one would drop 1.
+Even if you always want to drop the same amount, please also write it like this: `[2, 2]`. The [Count](#count) field always has priority over the DropAtOnce field. This means, if you'd assign for example this: `[3, 3]` and your Count is 10, the first three stones or monster or whatever would drop 3 Walnuts and the last one would drop 1.
 
 # StoneTypes
 
+If you assign this field, only the given **StoneTypes** can drop a Walnut in the area you assigned, instead of every stone in an area being able to drop a Walnut. Possible values are integers and strings, since the ID of some stones are strings. An example entry would look like this:
+
+`[2, 4, 6, 8, 10, 12, 14, "{{ModID}}_ExpStoneNode"]`
+
+These IDs are all the gem stones as well as a custom Stone that I used for example. The IDs are the entries in the `Data/Objects.json` file from the game. If you want to know, which Node has which ID, just type [ShowStoneTypeIDs](#showstonetypeids) into the smapi console and GWF will list you all of them as well as some minor explanations, which is which. I just added this because it is a bit annoying to find this out on your own.
+
+# How to add custom Stones
+
+This is normally something that lies outside of GWF, but I still want to briefly explain, how you can do it, since you have to do some workaround that I could only figure out with the help of **Esca**, the creator of the Framework Mod [FarmTypeManager](https://github.com/Esca-MMC/FarmTypeManager). So first of all, you need to add the Node as an Object into the Object.json. In your [Content Patcher](https://github.com/Pathoschild/StardewMods/tree/develop/ContentPatcher) Content Pack (what a sentence), you just do for example this:
+```
+{
+    "Action": "EditData",
+    "Target": "Data/Objects",
+    "Entries": {
+        "{{ModID}}_ExpStoneNode": {
+            "Name": "Stone",
+            "DisplayName": "ExpStoneNode",
+            "Description": "ExpStoneNode",
+            "Type": "Litter",
+            "Category": -999,
+            "Price": 0,
+            "Texture": "LooseSprites/{{ModID}}_Objects",
+            "SpriteIndex": 3,
+            "ColorOverlayFromNextIndex": false,
+            "Edibility": -300,
+            "IsDrink": false,
+            "Buffs": null,
+            "GeodeDropsDefaultItems": false,
+            "GeodeDrops": null,
+            "ArtifactSpotChances": null,
+            "CanBeGivenAsGift": true,
+            "CanBeTrashed": true,
+            "ExcludeFromFishingCollection": false,
+            "ExcludeFromShippingCollection": false,
+            "ExcludeFromRandomSale": false,
+            "ContextTags": null,
+            "CustomFields": null
+        }
+    }
+},
+{
+    "Action": "Load",
+    "Target": "LooseSprites/{{ModID}}_Objects",
+    "FromFile": "assets/Others/Custom_Objects.png"
+},
+```
+
+What you can see here, is, first, I add the entry to the Object.json. Then I load in the texture png file, so that the `"Texture"` field can find the texture. The important thing here is, make sure that the Field `"Name"` has the Value `"Stone"`. This makes the game recognize the object as a stone. This means, it can now be broken with a pickaxe and it has the default breaking animation. Unfortunately, this also defaults the stone's dropped item to a regular stone (or multiple of them). Maybe you can figure out, how to change/get rid of the normal stone drop. I couldn't. So I can just tell you how to add a drop and you do this by adding this line in your ModEntry:
+```helper.Events.World.ObjectListChanged += World_ObjectListChanged;```
+And then you do this function:
+```
+private void World_ObjectListChanged(object? sender, ObjectListChangedEventArgs e)
+{
+    foreach (var removedObj in e.Removed)
+    {
+        if (removedObj.Value.ItemId.ToString() == "ResoNight.IslandExpansion_ExpStoneNode")
+        {
+            Game1.createItemDebris(ItemRegistry.Create("ResoNight.IslandExpansion_ExpStone"), new Vector2(removedObj.Key.X * 64f, removedObj.Key.Y * 64f), Game1.random.Next(4));
+        }
+    }
+}
+```
+Of course, you have to change the Item ID, that the if checks for, to the ID that you gave your own Stone and the ID of the Item that you want to be dropped. Of course you can also add a chance to this, this code just always drops 1 of this item, 100% of the time. So with all this, you added an Object that is breakable and that will drop an item of your choice. Now you need to actually spawn the Stone in. You can obviously also do this with C#, but if you want the whole Quarry spawning logic, [FarmTypeManager](https://github.com/Esca-MMC/FarmTypeManager) definitely makes your life easier. However, there is a problem. The field [Ore_Spawn_Settings](https://github.com/Esca-MMC/FarmTypeManager#ore-spawn-settings) only works with vanilla Nodes. So you are going to spawn the Nodes in using the [Forage_Spawn_Settings](https://github.com/Esca-MMC/FarmTypeManager#forage-spawn-settings). So normally, you would have an entry for the items to spawn in like this:
+```
+"SpringItemIndex": [
+    "ResoNight.IslandExpansion_ExpFlower"
+],
+"SummerItemIndex": [
+    "ResoNight.IslandExpansion_ExpFlower"
+],
+"FallItemIndex": [
+    "ResoNight.IslandExpansion_ExpFlower"
+],
+"WinterItemIndex": [
+    "ResoNight.IslandExpansion_ExpFlower"
+],
+```
+(If you wonder, in my case, the map has no seasons and therefore I spawn in the same plant in all seasons). But now, if you want to spawn in the Nodes, you must do something like this instead:
+```
+"SpringItemIndex": [
+          {
+            "Category": "Object",
+            "Name": "ResoNight.IslandExpansion_ExpStoneNode",
+            "CanBePickedUp": false
+          }
+        ],
+        "SummerItemIndex": [
+          {
+            "Category": "Object",
+            "Name": "ResoNight.IslandExpansion_ExpStoneNode",
+            "CanBePickedUp": false
+          }
+        ],
+        "FallItemIndex": [
+          {
+            "Category": "Object",
+            "Name": "ResoNight.IslandExpansion_ExpStoneNode",
+            "CanBePickedUp": false
+          }
+        ],
+        "WinterItemIndex": [
+          {
+            "Category": "Object",
+            "Name": "ResoNight.IslandExpansion_ExpStoneNode",
+            "CanBePickedUp": false
+          }
+        ],
+```
+This, as you can probably guess, prevents the Node from being picked up. And this is the last necessary piece to add Custom Stones. And coming back to GWF, if you add Custom Stones, you can also use its ID in the [StoneTypes](#stonetypes) field. So for example you could pixel a "Walnut Stone" or something and add it to the Quarry on IslandNorth, just to give you some ideas.
+
+# MonsterTypes
+If you assign the **MonsterTypes** field, only the given **MonsterTypes** in your assigned area can drop a Walnut. This basically looks for monster classes, so even if you add custom monsters, they can still be referred to by its category. 
