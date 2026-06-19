@@ -13,6 +13,7 @@ using StardewValley.Extensions;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Shops;
 using StardewValley.Locations;
+using StardewValley.Monsters;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
 using xTile;
@@ -511,30 +512,6 @@ namespace GoldenWalnutFramework
                                 MainPatches.WalnutLocations.Add(walnutlocation!);
                             }
                         }
-                        if (walnut.MonsterTypes != null)
-                        {
-                            var MonsterNames = Game1.content.Load<Dictionary<string, string>>("Data/Monsters");
-                            foreach (string monster in walnut.MonsterTypes)
-                            {
-                                if (!MonsterNames.Keys.Contains(mf.ModIDReplacer(monster, ModID), StringComparer.OrdinalIgnoreCase))
-                                {
-                                    Monitor.Log($"Walnutgroup '{hint}': It seems like A Walnut with type MonsterLoot has a MonsterTypes entry with a monstername in it that doesn't exist in the Data/Monsters file (meaning the names on the left side in that file). You can also look up all the names on the Stardew Valley Wiki if you search for the page 'ModdingIndex' and there you will find a link for 'Monsters'. All the way down, you'll find a table with all the names", LogLevel.Error);
-                                    continue;
-                                }
-                            }
-                        }
-                        if (walnut.StoneTypes != null)
-                        {
-                            var StoneNames = Game1.content.Load<Dictionary<string, ObjectData>>("Data/Objects");
-                            foreach (string stone in walnut.StoneTypes)
-                            {
-                                if (!StoneNames.Keys.Contains(mf.ModIDReplacer(stone, ModID), StringComparer.OrdinalIgnoreCase))
-                                {
-                                    Monitor.Log($"Walnutgroup '{hint}': It seems like A Walnut with type Stone has a StoneTypes entry with a stone id in it that doesn't exist in the Data/Objects file. If you want to see the IDs you need, you can write ShowStoneTypeIDs in the SMAPI console and the IDs (excluding your added IDs) will be listed.", LogLevel.Error);
-                                    continue;
-                                }
-                            }
-                        }
                         string id = mf.getWalnutID(new KeyValuePair<WalnutGroupClass, string>(walnut, ModID))!;
                         if (walnut.Type == "Bush") { mf.SpawnBushes(new KeyValuePair<WalnutGroupClass, string>(walnut, ModID)); }
                         if (!thisModsIndividualWalnuts.Add(id))
@@ -901,7 +878,8 @@ namespace GoldenWalnutFramework
                     if (walnut.Type?.ToLower() != "monsterloot") { continue; }
                     if (!removedNPC.currentLocation.Name.Equals(mf!.ModIDReplacer(walnut.Location, walnutCluster.Value.ModID), StringComparison.OrdinalIgnoreCase)) { continue; }
                     if (nuttracker.Contains(ID) || nuttracker.Contains($"{ID}_{walnut.Count}")) { continue; }
-                    if (walnut.MonsterTypes != null && !walnut.MonsterTypes.Any(type => mf.ModIDReplacer(type, walnutCluster.Value.ModID)!.Equals(removedNPC.Name, StringComparison.OrdinalIgnoreCase))) { continue; }
+                    if (walnut.MonsterTypes != null && !walnut.MonsterTypes.Any(m => mf.ModIDReplacer(m, walnutCluster.Value.ModID)!.Equals(removedNPC.Name, StringComparison.OrdinalIgnoreCase)) && !walnut.MonsterTypes.Any(m => mf.ModIDReplacer(m, walnutCluster.Value.ModID)!.Replace('\\', '/').Equals(removedNPC.Sprite.textureName.Value.Replace('\\', '/'), StringComparison.OrdinalIgnoreCase))) { continue; }
+
                     if (walnut.Condition != null)
                     {
                         if (!Game1.MasterPlayer.mailReceived.Contains(mf.ModIDReplacer(walnut.Condition, walnutCluster.Value.ModID), StringComparer.OrdinalIgnoreCase)) { continue; }
