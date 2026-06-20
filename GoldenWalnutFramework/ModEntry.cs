@@ -566,10 +566,24 @@ namespace GoldenWalnutFramework
                         if (!MapPath.EndsWith(".tmx", StringComparison.OrdinalIgnoreCase) && !MapPath.EndsWith(".tbin", StringComparison.OrdinalIgnoreCase)) { MapPath += ".tmx"; }
                     }
                     var condition = "";
+                    string perchName = perchID;
+                    if (perch.StoneAnimation == true)
+                    {
+                        perchName = perchName + "-Volcano";
+                    }
+                    else 
+                    {
+                        if (perchName.Contains("Volcano"))
+                        {
+                            perchName = perchName.Replace("Volcano", "_______");
+                        }
+                        perchName = perchName + "-_______"; 
+                    }
+                    
                     if (perch.Condition != null) { condition = mf.ModIDReplacer(perch.Condition, ModID); }
                     if (!Game1.MasterPlayer.mailReceived.Contains(perchID))
                     {
-                        Custom_parrotUpgradePerches.Add(new ParrotUpgradePerch(perchLocation, new Point(perch.ParrotTile!.X!.Value, perch.ParrotTile!.Y!.Value), new Microsoft.Xna.Framework.Rectangle(perch.ParrotArea!.X!.Value, perch.ParrotArea!.Y!.Value, perch.ParrotArea!.Width!.Value, perch.ParrotArea!.Height!.Value), perch.Nuts!.Value, () => { Game1.MasterPlayer.mailReceived.Add(perchID); SpentWalnutsForPUPs += (int)perch.Nuts; }, () => false, perchID, condition));
+                        Custom_parrotUpgradePerches.Add(new ParrotUpgradePerch(perchLocation, new Point(perch.ParrotTile!.X!.Value, perch.ParrotTile!.Y!.Value), new Microsoft.Xna.Framework.Rectangle(perch.ParrotArea!.X!.Value, perch.ParrotArea!.Y!.Value, perch.ParrotArea!.Width!.Value, perch.ParrotArea!.Height!.Value), perch.Nuts!.Value, () => { Game1.MasterPlayer.mailReceived.Add(perchID); SpentWalnutsForPUPs += (int)perch.Nuts; }, () => false, perchName, condition));
                     }
                     else
                     {
@@ -2452,6 +2466,7 @@ namespace GoldenWalnutFramework
     {
         public string? ID { get; set; }
         public string? Location { get; set; }
+        public bool? StoneAnimation { get; set; }
         public int? Nuts { get; set; }
         public ParrotTile? ParrotTile { get; set; }
         public JSONRect? ParrotArea { get; set; }
