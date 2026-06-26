@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Design;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
@@ -42,6 +43,7 @@ namespace GoldenWalnutFramework
         public HashSet<string> excludedMapsFromSeasonalFeatures = new(StringComparer.OrdinalIgnoreCase);
         public List<ParrotUpgradePerch> Custom_parrotUpgradePerches = [];
         public List<KeyValuePair<string, Vector2>> vanillaBushes = [];
+        public HashSet<string> unobtainableWalnuts = [];
 
         public List<string> vanillaWalnutIDs = [
             "Bush_IslandNorth_13_33", "Bush_IslandNorth_5_30", "Buried_IslandNorth_19_39", "Bush_IslandNorth_4_42", "Bush_IslandNorth_45_38", "Bush_IslandNorth_47_40", "IslandLeftPlantRestored", "IslandRightPlantRestored", "IslandBatRestored", "IslandFrogRestored",
@@ -116,8 +118,6 @@ namespace GoldenWalnutFramework
                     nameof(MainPatches.RecountWalnuts_Postfix)
                 )
             );
-
-            //hier war transpiler
 
             new Harmony(ModManifest.UniqueID).Patch(
                 original: AccessTools.Method(
@@ -392,6 +392,21 @@ namespace GoldenWalnutFramework
                     nameof(BasePatches.GameLocationDrawAboveAlwaysFrontLayerHarmony_Postfix)
                 )
             );
+
+            new Harmony(ModManifest.UniqueID).Patch(
+                original: AccessTools.Method(
+                    typeof(Bush),
+                    "shake"
+                ),
+                prefix: new HarmonyMethod(
+                    typeof(BasePatches),
+                    nameof(BasePatches.BushShake_Prefix)
+                ),
+                postfix: new HarmonyMethod(
+                    typeof(BasePatches),
+                    nameof(BasePatches.BushShake_Postfix)
+                )
+            );
         }
         private bool launchedFirstCheck;
         private void GameLoop_UpdateTicked(object? sender, UpdateTickedEventArgs e)
@@ -457,6 +472,7 @@ namespace GoldenWalnutFramework
             AddQiShopConditions();
             RemoveOldBushes();
             CheckForInvalidPlacedBushes();
+            GiveUnobtainableWalnuts();
         }
 
         public void FillMainLists()
@@ -471,7 +487,9 @@ namespace GoldenWalnutFramework
             MainPatches.CustomWalnuts.Clear();
             excludedMapsFromSeasonalFeatures.Clear();
             Custom_parrotUpgradePerches.Clear();
+            unobtainableWalnuts.Clear();
             disableWalnutCap = false;
+            customHintForToday = null;
 
             int walnutGroupCount = 0;
 
@@ -523,7 +541,7 @@ namespace GoldenWalnutFramework
                 foreach (var walnut in group.Value.Walnuts)
                 {
                     if (!mf!.CheckJSONWalnuts(group.Key, walnut)) { continue; }
-                    if (walnut.Type!.ToLower() != "custom")
+                    if (!walnut.Type!.Equals("Custom", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!Game1.locations.Contains(Game1.getLocationFromName(walnut.Location)))
                         {
@@ -535,13 +553,13 @@ namespace GoldenWalnutFramework
                             MainPatches.WalnutLocations.Add(walnut.Location!);
                         }
                     }
-                    if (walnut.Type.ToLower() == "bush") { mf.SpawnBushes(walnut); }
+                    if (walnut.Type.Equals("Bush", StringComparison.OrdinalIgnoreCase)) { mf.SpawnBushes(walnut); }
                     if (MainPatches.CustomWalnuts.Any(storedWalnut => storedWalnut.ID == walnut.ID))
                     {
                         Monitor.Log($"Multiple walnuts with this ID: '{walnut.ID}' have been detected. If you are a player, you can give yourself a walnut for each time that you see this error to compensate for the missing walnuts. To do this, type into the SMAPI Console 'debug item 73 x' and for x the amount of times you get this error. If you are a modder, DO NOT add the same ID twice. If you didn't do that, another mod that you have currently installed also used the same ID. Please just use another ID in that case. (Are you using the {{ModID}} token)?", LogLevel.Error);
                         continue;
                     }
-                    if (walnut.Count == null || walnut.Count == 1 || walnut.Type == "Bush")
+                    if (walnut.Count == null || walnut.Count == 1 || walnut.Type.Equals("Bush", StringComparison.OrdinalIgnoreCase))
                     {
                         currentWalnutIDs = [.. currentWalnutIDs.AddItem(walnut.ID!)];
                     }
@@ -677,19 +695,18 @@ namespace GoldenWalnutFramework
             HashSet<string> customBushes = [];
             foreach (var walnut in MainPatches.CustomWalnuts)
             {
-                if (walnut.Type!.ToLower() == "bush")
+                if (walnut.Type!.Equals("Bush", StringComparison.OrdinalIgnoreCase))
                 {
-                    customBushes.Add($"Bush_{walnut.Location}_{walnut.X}_{walnut.Y}");
+                    customBushes.Add(walnut.ID!);
                 }
             }
             foreach (GameLocation l in Game1.locations)
             {
                 for (int i = l.largeTerrainFeatures.Count - 1; i >= 0; i--)
                 {
-                    if (l.largeTerrainFeatures[i] is Bush bush && bush.size.Value == 4 && bush.modData.ContainsKey("ResoNight.GoldenWalnutFramework/Owned"))
+                    if (l.largeTerrainFeatures[i] is Bush bush && bush.size.Value == 4 && bush.modData.TryGetValue("ResoNight.GoldenWalnutFramework/CustomID", out var customID))
                     {
-                        string thisBushID = $"Bush_{l.Name}_{(int)bush.Tile.X}_{(int)bush.Tile.Y}";
-                        if (!customBushes.Contains(thisBushID))
+                        if (!customBushes.Contains(customID))
                         {
                             l.largeTerrainFeatures.RemoveAt(i);
                             deletedCount++;
@@ -710,19 +727,15 @@ namespace GoldenWalnutFramework
             }
         }
 
-        public void CheckForInvalidPlacedBushes(GameLocation? location = null)
+        public void CheckForInvalidPlacedBushes()
         {
             foreach (var l in Game1.locations)
             {
-                if (location != null)
-                {
-                    if (location.Name != l.Name) { continue; }
-                }
                 foreach (var ltf in l.largeTerrainFeatures)
                 {
                     if (ltf is Bush bush && bush.size.Value == 4)
                     {
-                        if (!bush.modData.ContainsKey("ResoNight.GoldenWalnutFramework/Owned"))
+                        if (!bush.modData.ContainsKey("ResoNight.GoldenWalnutFramework/CustomID"))
                         {
                             if (!vanillaBushes.Any(vanillaBush => vanillaBush.Key == bush.Location.Name && vanillaBush.Value == bush.Tile))
                             {
@@ -731,6 +744,23 @@ namespace GoldenWalnutFramework
                         }
                     }
                 }
+            }
+        }
+
+        public void GiveUnobtainableWalnuts()
+        {
+            bool gaveAtLeastOne = false;
+            foreach (string id in unobtainableWalnuts)
+            {
+                if (!Game1.player.team.collectedNutTracker.Contains(id))
+                {
+                    gaveAtLeastOne = true;
+                    Game1.player.team.collectedNutTracker.Add(id);
+                }
+            }
+            if (gaveAtLeastOne)
+            {
+                Game1.addHUDMessage(new HUDMessage("You have received all the Golden Walnuts that became unobtainable, due to multiple mods adding a Walnut Bush at the same coordinates."));
             }
         }
 
@@ -1093,7 +1123,6 @@ namespace GoldenWalnutFramework
                 if (valid_customHint.Key != null)
                 {
                     string customHint = valid_customHint.Key;
-                    Monitor.Log(customHint, LogLevel.Debug);
                     if (valid_customHint.Value == 1 && customHint.Contains("{0}"))
                     {
                         for (int i = 0; i < MainPatches.SeparateWalnutGroups.Count; i++)
@@ -1353,12 +1382,33 @@ namespace GoldenWalnutFramework
         {
             GameLocation l = Game1.getLocationFromName(walnut.Location);
             Vector2 tilePos = new((int)walnut.X!, (int)walnut.Y!);
-            if (!l.largeTerrainFeatures.Any(tf => tf is Bush bush && bush.size.Value == 4 && bush.netTilePosition.Equals(tilePos)))
+            foreach (var ltf in l.largeTerrainFeatures)
             {
-                Bush walnutBush = new(tilePos, 4, l);
-                walnutBush.modData["ResoNight.GoldenWalnutFramework/Owned"] = "";
-                l.largeTerrainFeatures.Add(walnutBush); 
+                if (ltf is Bush bush && bush.size.Value == 4 && bush.netTilePosition.Equals(tilePos))
+                {
+                    if (bush.modData.TryGetValue("ResoNight.GoldenWalnutFramework/CustomID", out var customID))
+                    {
+                        if (customID != walnut.ID)
+                        {
+                            m.unobtainableWalnuts.Add(walnut.ID!);
+                        }
+                    }
+                    else
+                    {
+                        m.Monitor.Log("You placed a bush where a vanilla Bush already exists.", LogLevel.Error);
+                        m.unobtainableWalnuts.Add(walnut.ID!);
+                    }
+                    return;
+                }
             }
+            Bush walnutBush = new(tilePos, 4, l);
+            walnutBush.modData["ResoNight.GoldenWalnutFramework/CustomID"] = walnut.ID;
+            if (Game1.player.team.collectedNutTracker.Contains(walnut.ID))
+            {
+                walnutBush.tileSheetOffset.Value = 0;
+                walnutBush.setUpSourceRect();
+            }
+            l.largeTerrainFeatures.Add(walnutBush);
         }
 
 
@@ -2069,7 +2119,7 @@ namespace GoldenWalnutFramework
             var nuttracker = who.team.collectedNutTracker;
             foreach (var walnut in CustomWalnuts)
             {
-                if (walnut.Type!.ToLower() != "fishing") { continue; }
+                if (walnut.Type!.Equals("Fishing", StringComparison.OrdinalIgnoreCase)) { continue; }
                 if (nuttracker.Contains(walnut.ID) || nuttracker.Contains($"{walnut.ID}_{walnut.Count}")) { continue; }
                 if (!location.Name.Equals(walnut.Location, StringComparison.OrdinalIgnoreCase)) { continue; }
                 if (!GameStateQuery.CheckConditions(walnut.Conditions)) { continue; }
@@ -2107,19 +2157,20 @@ namespace GoldenWalnutFramework
 
         public static void GameLocationDayUpdateHarmony_Postfix(GameLocation __instance) //This makes the mod ResetTerrainFeatures work properly
         {
-            if (!WalnutLocations.Contains(__instance.Name)) { return; }
             foreach (var walnut in CustomWalnuts)
             {
-                if (walnut.Type!.ToLower() != "Bush") { continue; }
-                if (walnut.Location!.Equals(__instance.Name, StringComparison.OrdinalIgnoreCase)) { continue; }
-                if (!__instance.largeTerrainFeatures.Any(ltf => ltf is Bush bush && bush.size.Value == 4 && bush.Tile == new Vector2((int)walnut.X!, (int)walnut.Y!)))
+                if (!walnut.Type!.Equals("Bush", StringComparison.OrdinalIgnoreCase)) { continue; }
+                if (!walnut.Location!.Equals(__instance.Name, StringComparison.OrdinalIgnoreCase)) { continue; }
+                mf.SpawnBushes(walnut);
+            }
+            foreach (var ltf in __instance.largeTerrainFeatures)
+            {
+                if (ltf is Bush bush && bush.size.Value == 4 && !bush.modData.ContainsKey("ResoNight/GoldenWalnutFramework/CustomID") && Game1.player.team.collectedNutTracker.Contains($"Bush_{bush.Location.Name}_{bush.netTilePosition.X}_{bush.netTilePosition.Y}"))
                 {
-                    Bush newBush = new(new Vector2((int)walnut.X!, (int)walnut.Y!), 4, __instance);
-                    newBush.modData["ResoNight.GoldenWalnutFramework/Owned"] = "";
-                    __instance.largeTerrainFeatures.Add(newBush);
+                    bush.tileSheetOffset.Value = 0;
+                    bush.setUpSourceRect();
                 }
             }
-            Game1.delayedActions.Add(new DelayedAction(10, () => m.CheckForInvalidPlacedBushes(__instance)));
         }
 
         public static void loadMap_Postfix(GameLocation __instance)
@@ -2235,6 +2286,30 @@ namespace GoldenWalnutFramework
                 if (perch.locationRef?.Value != __instance) { continue; }
                 perch.DrawAboveAlwaysFrontLayer(b);
             }
+        }
+        public static bool bushHasWalnut = true;
+        public static void BushShake_Prefix(Bush __instance)
+        {
+            if (__instance.tileSheetOffset.Value == 0)
+            {
+                bushHasWalnut = false;
+            }
+        }
+
+        public static void BushShake_Postfix(Vector2 tileLocation, Bush __instance)
+        {
+            if (!bushHasWalnut)
+            {
+                bushHasWalnut = true;
+                return;
+            }
+            string generatedID = $"Bush_{__instance.Location.Name}_{tileLocation.X}_{tileLocation.Y}";
+            if (__instance.modData.TryGetValue("ResoNight.GoldenWalnutFramework/CustomID", out var customID))
+            {
+                Game1.delayedActions.Add(new DelayedAction(10, () => Game1.player.team.collectedNutTracker.Remove(generatedID)));
+                Game1.player.team.collectedNutTracker.Add(customID);
+            }
+            
         }
     }
 
