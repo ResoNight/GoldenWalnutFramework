@@ -88,11 +88,11 @@ One small tip, you might want to have all your content in a separate file, so yo
 ```
 and then you can write all your entries into that separate file.
 
-## General
+# General
 Now you can start writing stuff into the **Entries** field. There are a few things I want to mention before you jump into adding your new entries. The [Contents](#contents)
 field above roughly matches the structure that your entries will have. All entries will be checked when you start the game and they will be checked again, after you load into a save. The check for your [Location](#location) entries can only happen after loading into a save. If you are adding/changing entries in your content.json, you don't need to fully close the game and reopen it. You can just exit the save and re-enter it. You will get a little warning into your SMAPI console, when you add or remove a [Walnut Group](#hint), but don't worry, your collected Walnut Count will just be off for that session. After restarting, it will always be correct. Now lets get started with **GoldenWalnuts!**
 
-## GoldenWalnuts
+# GoldenWalnuts
 The Basic structure for Golden Walnuts looks like this:
 ```
 "GoldenWalnuts": {
@@ -156,7 +156,7 @@ This field lets you set a [GameStateQuery](#gamestatequeries) as a condition, af
 
 This field works just like the [conditions](#conditions) field for walnuts, I hope that the naming just makes things less confusing. It is a usual "Conditions" field like most other mods. Also all Walnuts within this group will automatically have this as a condition as well, so the player **cannot** collect Walnuts of still unavailable hints. But one important thing is, while it might sound odd, I would probably not recommend using this field. First of all, the player is most likely not aware of even the possibility of conditional hints. So depending on what you are doing, you should maybe think of telling the player in some way. And also, when a player is getting no hints anymore but has missing walnuts, it can be a little frustrating, because it is literally the point of the hint to tell the player where the rest is. So I guess one good way to use this field would be for example, you add an event with the wizard and he spawns in 100 new walnuts in the valley and then you give all your hints this event as a condition. Or maybe you could make a questline where you let the wizard say something like "after you found 30 Walnuts, I will hide some more for you". Just something where the player would naturally know that there are new hints/obtainable Walnuts now. You also have to keep in mind that this only gives your Hint the *chance* to appear, it will not appear for sure, since you have to keep in mind that both [Hintpools](#separatehint) are shared by all mods. So for example while you could chain Hints together using the added "COMPLETED_WALNUTGROUP xy" [GameStateQuery](#gamestatequeries), you must keep in mind that the player might have to wait multiple days before he can get your new hint. Also the player doesn't have to actually see your hint for the Walnuts to become obtainable, which could also lead to some unintuitive situations. So, to summarize all this, you should really try to be a good game designer and think, what feels natural and what is fun for the player. This field is bad gamedesign most of the times, but it *can* be used well, if you really think how to use it properly.
 
-## Walnuts
+# Walnuts
 For each Walnut, there are those fields:
 Field|Value|Description
 -----|-----|-----------
@@ -181,7 +181,7 @@ The ID that you assign here is the ID that will be added under `Game1.player.tea
 ## Type
 There are a total of 6 Types that a Walnut can have. Each type has different fields that it **must** have, **can** have and **cannot** have. I will go through them one by one.
 
-# Bush
+## Bush
 ![Indoors Bush](docs/images/Example_Bush_Indoors.png)
 
 Possible Fields|Status
@@ -205,7 +205,7 @@ Example:
 
 A **Bush** must always have those fields and cannot have any other than that. On the Paths TileSheet when creating maps, there is a tile that lets you spawn in Walnut Bushes. ***DO NOT USE THIS!*** Adding a Walnut with Type Bush will spawn it in automatically. When you place them yourself, the Framework cannot keep track of them! What you can do though is place the tile with index 7 from the paths TileSheet on the Paths layer (see [Paths Layer](https://stardewvalleywiki.com/Modding:Maps#Paths_layer) on the Wiki). This is a tile that does not have any effect at all, so it is good for yourself to keep track, where you placed Bushes. Bushes do also support the [Conditions](#conditions) field, however, they cannot spawn in as soon as you meet those conditions, since checking every tick would be wayyy too much. Therefore, everytime you enter a location, the game will check for the Conditions of the Bushes in that area and therefore, the Bushes will spawn. You might want to keep that in mind, depending on how you use the Conditions field. Also, keep in mind that once a Bush has been spawned, it will not disappear, when the player doesn't meet the conditions anymore (So for example `TIME 600 900` will not make the Bush despawn after 9 am). One more thing, just like normal Bushes, spawning a Bush once would normally let it stay in the save file permanently. However, you don't have to worry about that. You will occasionally see a `x Bushes removed` in the console, since GWF automatically removes any Walnut Bushes that have been placed using the framework, but don't have any matching current entry.
 
-# Buried
+## Buried
 ![Buried in Town](docs/images/Example_Buried_Town.png)
 
 Possible Fields|Status
@@ -231,7 +231,7 @@ Example:
 
 A **Buried Walnut** works pretty much exactly how you think it would work. If you assign a Count, all those Walnuts will be dropped at once. Especially for buried walnuts, the *Conditions* field might be very useful to f.e. only let a walnut be dropped *after* the player has read a **Secret Note**. GWF does *not* provide a framework for Secret Notes, so see below at [Conditions](#conditions). Keep in mind that the tile for your walnut must be *diggable*!
 
-# Fishing
+## Fishing
 ![Fishing at Log in Mountain](docs/images/Example_Fishing_Log.png)
 
 Possible Fields|Status
@@ -263,7 +263,7 @@ Example:
 
 For Fishing type Walnuts, you can either assign [X and Y](#x-and-y) for one specific tile or you can use the [Areas](#areas) field to assign a larger area. See below for more details on how to use the [Areas](#areas) field. If you use neither, the area will just be the whole map. If you assign a [Count](#count) and the last Walnut is being fished, the game will play a small soundeffect, so that the player knows, that he got all walnuts of one entry. The [DropAtOnce](#dropatonce) feature unfortunately does not work for **Fishing** type walnuts, since you are actively fishing one walnut instead of x walnuts being dropped into the world. For the [Chance](#chance), please keep in mind that the player is fishing pretty slowly and you can only fish one at a time. So whereas a 0.05 chance for a [Stone](#stone) type Walnut in a larger quarry would be perfectly reasonable, a 0.05 chance for fishing, especially if you assign a Count like 5, would be terrifyingly frustrating. So, in short, think of what you are doing and always think of the unlucky ones :) You can also assign Conditions (see below at [Conditions](#conditions)).
 
-# Stone
+## Stone
 ![Stone in MountainQuarry](docs/images/Example_Stone_Mountain.png)
 
 Possible Fields|Status
@@ -294,7 +294,7 @@ Example:
 
 This type causes Stones to drop Walnuts if you break them in any way, just like the MusselStones on IslandWest. You can either assign [X and Y](#x-and-y) for one specific tile or you can use the [Areas](#areas) field to assign a larger area. See below for more details on how to use the [Areas](#areas) field. If you use neither, the area will just be the whole map. If you assign a Count, the game will play a soundeffect whenever the player collects the last walnut from one entry. For Stones, you can also assign the [DropAtOnce](#dropatonce) field. Whenever the Stone is going to drop Walnuts, it will drop a random amount of walnuts between your left and right number. So in the case of the example, a stone will drop 1, 2 or 3 walnuts at once (See [DropAtOnce](#dropatonce) for more details). There is also the field [StoneTypes](#stonetypes) which, when set, only lets the given Stones drop Walnuts, including Custom Stones (see below at [StoneTypes](#stonetypes). For the [Chance](#chance) field, you should really think about how you are going to set this. You have to consider the size of your quarry, the amount of stones that can drop walnuts, the amount that can be dropped at once and the bad luck of some players. For example my example from above was actually not that good. Upon testing, in 10 out of 10 cases with a full quarry, I got the 10 Walnuts, often with the very first bomb. So for above's example, I would completely leave out DropAtOnce and then I would say it would be decently balanced. So maybe you want to go out and just test, what Chance you want to set. This Walnut Type also supports the Conditions field (see below at [Conditions](#conditions)).
 
-# MonsterLoot
+## MonsterLoot
 ![Slime at Moonscythe Island](docs/images/Example_Slime_MS_Island.png)
 
 Possible Fields|Status
@@ -326,7 +326,7 @@ Example:
 
 To make it short, this Type works basically *exactly* like the [StoneTypes](#stonetypes) walnut. Keep in mind, the area that you assign with the [Areas](#areas) field refers to the last tile on which the monster has been killed, **NOT** where you spawned the monster (since I cannot trace back where a monster has been spawned). You can also specify, which kind of monsters can drop Walnuts by using the [MonsterTypes](#monstertypes) field. One more thing, I hope this is already clear, but if you f.e. spawn in monsters using [FarmTypeManager](https://github.com/Esca-MMC/FarmTypeManager), ***DO NOT*** add a Walnut as loot. This framework handles the loot on its own, you don't need to add it
 
-# Custom
+## Custom
 ![Fountain at Farming Island](docs/images/Example_Fountain_F_Island.png)
 
 Possible Fields|Status
@@ -408,13 +408,13 @@ for (int i = 1; i <= 5; i++)
 ```
 As you can see, I really want to make sure that you do it the right way XD. If you ever need to look up the Walnuts that the player currently has, you can type [ShowWalnuts](#showwalnuts) into the SMAPI console and you get a list of them. The rest is on you. As long as you properly mark the Walnuts as collected in the **NutTracker** and you make sure that even in multiplayer, a walnut cannot accidentally be dropped multiple times (since you wouldn't get any warning or error of any kind for that), everything should be fine. Please also read [WalnutShops](#walnutshops) below. Now we are through with all the possible values for the [Type](#type) field. Now we can go on with the other fields.
 
-# Location
+## Location
 For the location field, there are a few things to keep in mind. First, whenever you start the game, you can already see the error logs for your entries. But the location field can only be checked after you loaded into a save, since GWF needs to check for existing locations. For the location field, you need to add the name that the in-game location has, NOT the name of its file. So for example there is the file `Island_N`, but the location is named `IslandNorth` and you need to write *IslandNorth* into the locations field. If you don't know the name of a location, there are a few ways to find the name. First, you can go into the Data/Locations.json and actively look for the name in there. But this can be a bit annoying sometimes. So if you have the Mod FarmTypeManager installed, you can just go to the location and type `whereami` into the console and it will tell you the name of the location. Or probably the easiest way, you look at this [table](https://stardewvalleywiki.com/Modding:Location_data#Location_names) from the Wiki. Everything about the location entry is similar for the Locations field for [Golden Walnuts](#goldenwalnuts) and for [Parrot Upgrade Perches](#parrotupgradeperches).
 
-# X and Y
+## X and Y
 Those two fields are pretty self-explanatory. They assign one specific tile. For [Bushes](#bushes), this is the left tile of the Bush.
 
-# Areas
+## Areas
 This field lets you add multiple areas in that a Walnut can be obtained. The entries of this field must look like this:
 ```
 "ExtraTiles": [
@@ -434,13 +434,13 @@ This field lets you add multiple areas in that a Walnut can be obtained. The ent
 ```
 For each {}, you can assign the [X and Y](x-and-y) coordinates and optionally also the [Width and Height](#width-and-height). If one of those or both are omitted, they just default to 1.
 
-# Chance
+## Chance
 The chance is a number between 0 and 1. Genuinely think about what chance you can assign, it can quickly get frustrating, if someone is unlucky. And if many people play your mod, there *will* be unlucky people. For Fishing walnuts especially, you shouldn't make the chance too low, because you have to actively spent a ton of ingame time to get a chance one by one, whereas for monsters and stones, you can quickly go in, kill them once or destroy them once and then you got your chance for today, so fishing is generally much more frustrating than the other types.
 
-# Count
+## Count
 If you assign a Count to a Walnut, the ID gets changed a bit. Instead of one walnut having the [ID](#id) that you assigned (or that is automatically generated (see below at [AutomaticWalnutIDs](#automaticWalnutIDs)), each walnut gets its own individual ID, that is simply ID_1, ID_2, ID_3 and so on, up until your Count. The Count that you assign always determine the upper limit of how many walnuts you can get from this Walnut entry (So the field [DropAtOnce](#dropatonce) cannot exceed this limit)). For [Buried](#buried) Walnuts, all Walnuts will be dropped at once. For each other Walnut, you can get the Walnuts one at a time. If the player collects the last Walnut of a Walnut entry, the game will play a little soundeffect ("jingle1" if you are interested). Setting the Count to 1 is completely pointless, just don't. It will *NOT* change the ID to ID_1 in that case.
 
-# DropAtOnce
+## DropAtOnce
 A valid entry for this field must look like this:
 
 `"lowerBorder/upperBorder`
@@ -451,7 +451,7 @@ So for example this:
 
 But it can also be just a single number, if you don't need a range. The [Count](#count) field always has priority over the DropAtOnce field. This means, if you were to assign for example this: `3` and your Count is 10, the first three stones or monster or whatever would drop 3 Walnuts and the last one would drop 1.
 
-# StoneTypes
+## StoneTypes
 
 If you assign this field, only the given **StoneTypes** can drop a Walnut in the area you assigned, instead of every stone in an area being able to drop a Walnut. Possible values are integers and strings, since the ID of some stones are strings. An example entry would look like this:
 
@@ -563,7 +563,7 @@ Of course, you have to change the Item ID, that the if checks for, to the ID tha
 ```
 This, as you can probably guess, prevents the Node from being picked up. And this is the last necessary piece to add Custom Stones. And coming back to GWF, if you add Custom Stones, you can also use its ID in the [StoneTypes](#stonetypes) field. So for example you could pixel a "Walnut Stone" or something and add it to the Quarry on IslandNorth, just to give you some ideas.
 
-# MonsterTypes
+## MonsterTypes
 If you assign the **MonsterTypes** field, only the given **MonsterTypes** in your assigned area can drop a Walnut. This basically looks for monster classes, so even if you add custom monsters, they can still be referred to by its category. The list of available Monster types can be seen on the [Monsters](https://stardewvalleywiki.com/Modding:Monster_data#Monster_IDs) page on the wiki. The table that you see there all the way to the bottom shows all types of Monsters. Keep in mind, the entry that you must enter here is always the ID, so the entry on the right side of the table. This means that for example for the monster that is usually called dust sprite, you must take the ID called "Dust Spirit" instead. If you happen to add multiple Monsters in one location with the same type, but different sprites, you can also put the sprite path in here, instead of the actual MonsterType. To do this, you must have loaded your sprite into the game somewhere. So if you have something like this:
 ```
 {
@@ -578,7 +578,7 @@ You would write this into the MonsterTypes field:
 ```
 
 
-# Conditions
+## Conditions
 The **conditions** field lets you set one or multiple [GameStateQueries](#gamestatequeries) as a condition after that the Walnut becomes available. This field works generally like most conditions fields in other mods. Whereas you can do this for practically any reason, the most obvious reason is definitely by using a Secret Note. GWF does *not* provide a framework for Secret Notes, because [Secret Note Framework](https://github.com/ichortower/SecretNoteFramework) by ichortower already exists and it already has every feature one could ask for. So if you want to use that framework, please read through its author guide. So lets say you already have a working Secret Note. Then you have something like for example this:
 ```
 "{{ModID}}_SecretNote_Buried_F_Island_1": {
@@ -594,4 +594,4 @@ Then you can write this into the Conditions field (that is a custom GameStateQue
 
 This will effectively make the Walnut obtainable after any player has read the Secret Note. You could also write Current, All or Host instead of Any. One important thing is, while Walnuts have the Conditions field, the whole Walnutgroup and the [Hint](#hint) have the field [HintConditions](#hintconditions) as well. That field works exactly the same like the Conditions field for a single Walnut. But important to note is, every Walnut of the same group also have the conditions set in the [HintConditions](#hintconditions) field. Therefore, as long as the [Hint](#hint) itself is not available, none of its Walnuts are either.
 
-## ParrotUpgradePerches
+# ParrotUpgradePerches
