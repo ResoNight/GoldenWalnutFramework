@@ -14,6 +14,7 @@ And you can add new Parrot Upgrade Perches (The Parrots that sit on a stick and 
     * [Singular](#singular)
     * [SeparateHint](#separatehint)
     * [ShowThisHint](#showthishint)
+    * [HintConditions](#hintconditions)
     * [Walnuts](#walnuts)
       * [ID](#id)
       * [Type](#type)
@@ -55,6 +56,7 @@ And you can add new Parrot Upgrade Perches (The Parrots that sit on a stick and 
   * [ShowAllWalnutIDs](#showallwalnutids)
   * [ShowAllStoneTypeIDs](#showallstonetypeids)
   * [/recountNuts](#recountNuts)
+* [GameStateQueries](#gamestatequeries)
 * [Example File](#example-file) 
 
 ## Installation
@@ -87,8 +89,7 @@ and then you can write all your entries into that separate file.
 
 ## General
 Now you can start writing stuff into the **Entries** field. There are a few things I want to mention before you jump into adding your new entries. The [Contents](#contents)
-field above roughly matches the structure that your entries will have. IDs work in a pretty unusual way, so please read [Walnut ID](#walnut-ids) and the Setting
-[AutomaticWalnutIDs](#automaticwalnutids). All entries will be checked when you start the game and they will be checked again, if you load into a save. The check for your [Location](#location) entry can only happen after loading into a save. If you are adding/changing entries in your content.json, you don't need to fully close the game and reopen it. You can just exit the save and re-enter it. You will get a little warning into your SMAPI console, when you add or remove a [Walnut Group](#hint), but don't worry, your collected Walnut Count will just be off for that session. After restarting, it will always be correct. Now lets get started with **GoldenWalnuts!**
+field above roughly matches the structure that your entries will have. All entries will be checked when you start the game and they will be checked again, after you load into a save. The check for your [Location](#location) entries can only happen after loading into a save. If you are adding/changing entries in your content.json, you don't need to fully close the game and reopen it. You can just exit the save and re-enter it. You will get a little warning into your SMAPI console, when you add or remove a [Walnut Group](#hint), but don't worry, your collected Walnut Count will just be off for that session. After restarting, it will always be correct. Now lets get started with **GoldenWalnuts!**
 
 ## GoldenWalnuts
 The Basic structure for Golden Walnuts looks like this:
@@ -118,11 +119,11 @@ The Basic structure for Golden Walnuts looks like this:
 
 
 ## Unique Key
-This is just a unique key that you must assign, that stands for one walnut group. Make this as unique as possible to avoid conflicts with other mods. Using the `{{ModID}}` token is strongly advised (see [ModID in Content Patcher](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/tokens.md#ModId))
+This is just a unique key that you must assign, that stands for one walnut group. Make this as unique as possible to avoid conflicts with other mods. Using the `{{ModID}}` token is strongly advised (see [ModID in Content Patcher](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/tokens.md#ModId)).
 
 ## Hint
-The Hint is what you will see when you right click the Parrot in the Island Hut on IslandEast. Using the [Language Token](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/tokens.md#i18n) is strongly advised, even if you are not planning to add other languages. Using this token makes it possible for other people to add a translation for your mod. For simplicity, the rest of this Guide will not use this token.) The vanilla game writes the hints in a quite unique way, that you might want to follow. There are two ways how a Hint can
-be written. The first way, is, you just write the hint and no matter how many Walnuts under this hint are remaining, it will say the same thing. But you
+The Hint is what you will see when you right click the Parrot in the Island Hut on IslandEast. Using the [Language Token](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/tokens.md#i18n) is strongly advised, even if you are not planning to add other languages. Using this token makes it possible for other people to add a translation for your mod. For simplicity, the rest of this Guide will not use this token. The vanilla game writes the hints in a quite unique way, that you might want to follow. There are two ways how a Hint can
+be written. The first way is, you just write the hint and no matter how many Walnuts under this hint are remaining, it will say the same thing. But you
 can also let the Parrot say the amount of remaining walnuts by adding `{0}` somewhere in the hint. So for example, if there are 5 Walnuts in a group
 that you haven't collected yet, then this: 
 
@@ -132,12 +133,11 @@ would automatically turn into this, when talking to the Parrot:
 
 `5 buried in the north...` 
 
-***Important!*** always write `{0}` with a 0,
-***NEVER*** any other number than that!
+***Important!*** always write `{0}` with a 0, ***NEVER*** any other number than that!
 
 For those hints in specific, concernedApe always wrote them in a way so that the **singular** and **plural** form
 are the same. So he never wrote f.e. `{0} Walnuts in the Ocean...`, since this could say `1 Walnuts in the Ocean...`. However, I just added a way so you can
-write a [singular](#singular) form that will be shown instead, when you have 1 Walnut remaining of this group. One last thing, don't make your hints too long or they might go **off screen**! To test how a Hint looks on the screen, set [ShowThisHint](#showthishint) to true for one hint.
+write a [singular](#singular) form that will be shown instead, when you have 1 Walnut remaining of this group. One last thing, don't make your hints too long or they might go **off screen**! To test how a Hint looks on the screen, you can set [ShowThisHint](#showthishint) to true for one hint.
 
 ## Singular
 If your [Hint](#hint) contains a `{0}` and you want to have a singular form of the string, when the player has only one remaining Walnut in this group, you can assign the Singular field. Using the [Language Token](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/tokens.md#i18n) is strongly advised. This field technically also supports `{0}`, but this will always be replaced with 1, since this will only be shown if you have 1 walnut remaining.
@@ -147,6 +147,13 @@ There are two separate pools of [Hints](#hint) that work a bit differently. Ther
 
 ## ShowThisHint
 This is a specific setting, just to test things. When you set "ShowThisHint": true for a hint, the Hint of the first day when you load into a save will be overwritten by the hint for that you assigned this field. The hints for the coming days will work as usual. You can assign this field for only one hint at a time. Once for a Hint from the normal pool and once for a Hint that has [SeparateHint](#separatehint) set to true. DO NOT forget to remove this field before uploading your Mod!
+
+## HintConditions
+This field lets you set a [GameStateQuery](#gamestatequeries) as a condition, after that the [Hint](#hint) can appear at the Parrot in the hut. For example like this:
+
+`PLAYER_HAS_MAIL Host ThisIsAMailFlagYey Received`
+
+This field works just like the [conditions](#conditions) field for walnuts, I hope that the naming just makes things less confusing. It is a usual "Conditions" field like most other mods. Also all Walnuts within this group will automatically have this as a condition as well, so the player **cannot** collect Walnuts of still unavailable hints. But one important thing is, while it might sound odd, I would probably not recommend using this field. First of all, the player is most likely not aware of even the possibility of conditional hints. So depending on what you are doing, you should maybe think of telling the player in some way. And also, when a player is getting no hints anymore but has missing walnuts, it can be a little frustrating, because it is literally the point of the hint to tell the player where the rest is. So I guess one good way to use this field would be for example, you add an event with the wizard and he spawns in 100 new walnuts in the valley and then you give all your hints this event as a condition. Or maybe you could make a questline where you let the wizard say something like "after you found 30 Walnuts, I will hide some more for you". Just something where the player would naturally know that there are new hints/obtainable Walnuts now. You also have to keep in mind that this only gives your Hint the *chance* to appear, it will not appear for sure, since you have to keep in mind that both [Hintpools](#separatehint) are shared by all mods. So for example while you could chain Hints together using the added "COMPLETED_WALNUTGROUP xy" [GameStateQuery](#gamestatequeries), you must keep in mind that the player might have to wait multiple days before he can get your new hint. Also the player doesn't have to actually see your hint for the Walnuts to become obtainable, which could also lead to some unintuitive situations. So, to summarize all this, you should really try to be a good game designer and think, what feels natural and what is fun for the player. This field is bad gamedesign most of the times, but it *can* be used well, if you really think how to use it properly.
 
 ## Walnuts
 For each Walnut, there are those fields:
