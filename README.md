@@ -443,7 +443,7 @@ If you assign a Count to a Walnut, the ID gets changed a bit. Instead of one wal
 ## DropAtOnce
 A valid entry for this field must look like this:
 
-`"lowerBorder/upperBorder`
+`"lowerBorder/upperBorder"`
 
 So for example this:
 
