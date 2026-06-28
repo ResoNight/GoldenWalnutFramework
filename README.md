@@ -1,7 +1,6 @@
 # Golden Walnut Framework (GWF)
 
-This is a Framework Mod that lets you add custom Golden Walnuts and Parrot Upgrade Perches. You can add Walnut Bushes, bury Walnuts, drop them when you destroy a Stone and much more.
-And you can add new Parrot Upgrade Perches (The Parrots that sit on a stick and where you can trade Walnuts for a Map change) and trigger Map Overrides, destroy some tiles or anything else.
+This is a Framework Mod that lets you add custom Golden Walnuts and Parrot Upgrade Perches. You can add Walnut Bushes, bury Walnuts, drop them when you destroy a Stone and much more. And you can add new Parrot Upgrade Perches (The Parrots that sit on a stick and where you can trade Walnuts for a Map change) and trigger Map Overrides, destroy some tiles or anything else. This guide explains, how you have to do everything when you are working with [Content Patcher](https://www.nexusmods.com/stardewvalley/mods/1915). If you are just making a Mod via C#, I must say, I have no idea how all this works. I assume though that you know yourself how to add entries into a jsonfile, if you are already deciding to not use Content Patcher for some reason. Just note that the Target file is `Mods/GoldenWalnutFramework/Data`.
 
 
 ## Contents
@@ -41,9 +40,9 @@ And you can add new Parrot Upgrade Perches (The Parrots that sit on a stick and 
   * [ParrotTile](#parrottile)
   * [StickType](#sticktype)
   * [ParrotArea](#parrotarea)
+  * [StoneAnimation](#stoneanimation)
   * [DestroyAreas](#destroyAreas)
   * [FromFile, FromArea, ToArea](#fromfile,-fromarea,-toarea)
-  * [StoneAnimation](#stoneanimation)
   * [Condition](#condition)
 * [Settings](#settings)
   * [WalnutShops](#walnutshops) <- this one is important
@@ -99,8 +98,9 @@ The Basic structure for Golden Walnuts looks like this:
     "UniqueKey1": {
         "Hint": "...",
         "Singular": "...",
-        "SeparateHint": true/false //optional
-        "ShowThisHint": true/false //optional
+        "SeparateHint": true/false, //optional
+        "ShowThisHint": true/false, //optional
+        "HintConditions": "AnyGameStateQuery" //optional
         "Walnuts": [
             {
                 //Entries for the first walnut
@@ -595,3 +595,167 @@ Then you can write this into the Conditions field (that is a custom GameStateQue
 This will effectively make the Walnut obtainable after any player has read the Secret Note. You could also write Current, All or Host instead of Any. One important thing is, while Walnuts have the Conditions field, the whole Walnutgroup and the [Hint](#hint) have the field [HintConditions](#hintconditions) as well. That field works exactly the same like the Conditions field for a single Walnut. But important to note is, every Walnut of the same group also have the conditions set in the [HintConditions](#hintconditions) field. Therefore, as long as the [Hint](#hint) itself is not available, none of its Walnuts are either.
 
 # ParrotUpgradePerches
+In case you don't know, a perch is also an english word for like a stick where a bird is sitting on. Lets just call it pole to avoid confusion. So a Parrot Upgrade Perch (in short PUP) refers to the Parrot that is sitting on such a stick with that you can trade walnuts in to change something on the map. The basic structure looks like this (note the [] and {} brackets):
+
+```
+"ParrotUpgradePerches": [
+    {
+        //entries for first Parrot
+    },
+    {
+        //entries for second Parrot
+    },
+    ...
+]
+```
+
+There is one very important thing with ParrotUpgradePerches. ***DO NOT*** softlock the player!! You should always assume that the player plays on a save where he already obtained all vanilla walnuts and sold the rest. So always hide at least the amount of Walnuts that the Parrot will cost somewhere where the player can reach them. Be careful with hiding walnuts *behind* an area that the player can only open up with a PUP!
+And all the possible entries are this:
+Field|Value|Description
+-----|-----|-----------
+[ID](#id-(pup)) | string | A unique ID for the PUP that also works as its MailFlag (see [ID (PUP)](#id-(pup))
+[Location](#location-(pup)) | string | The location of the Parrot
+[Nuts](#nuts) | int | the required amount of Walnuts to activate the Parrot
+[ParrotTile](#parrottile) | {X: .., Y: ..} | The exact Tile of the Parrot (the tile refers to the bottom of the pole structure thingy)
+[StickType](#sticktype) | string | if set, places the pole for the Parrot as well
+[ParrotArea](#parrotarea) | complex object | defines the area where the Parrots will start picking for the completion animation
+[StoneAnimation](#stoneanimation) | true/false | if set to true, changes the animation effects and sounds to a destroying stone kind of sound
+[DestroyAreas](#destroyareas) | complex object | defines the areas that will be destroyed upon completion
+[FromFile](#fromfile,-fromarea,-toarea) | string | The Mappath to the file from that you load the Map Override
+[FromArea](#fromfile,-fromarea,-toarea) | complex object | The area from the source map for the Map Override
+[ToArea](#fromfile,-fromarea,-toarea) | complex object | The target area where the Map will be overritten
+[Condition](#condition) | string | If set, lets the Parrot spawn after the Host received a set MailFlag (does NOT support a GameStateQuery)
+
+
+## ID (PUP)
+The ID for a ParrotUpgradePerch must be unique and using the {{ModID}} token is strongly advised! So normally, a PUP gets spawned in once and stays in the save. But due to flexibility, the PUPs that come from this framework do **not** work like that. When you complete a ParrotUpgradePerch, its ID will be sent to the Host as a MailFlag and after restarting the game, the PUP will completely disappear from the save and will not be reinitialized if the Host has this MailFlag. That means two things. First, if you need to know if a PUP is completed or not, you should always just look if the Host has its ID as a MailFlag. If you want to look this up if the Host already has it, you can use the command [ShowMailFlags](#showmailflags) and see if you can find it. Sometimes when you want to test things, you might want to reset a PUP. You do this by using the command '[RemoveMailFlag](#removemailflag) flag' and for for flag, you enter the ID of the PUP.
+
+## Location (PUP)
+The location entry is the same as the [location](#location) entry for Walnuts.
+
+## Nuts
+This is the required amount of Walnuts that the player needs to trigger a ParrotUpgradePerch. Be careful to not softlock the Player!!! You should hide at least the amount of walnuts that you set here, somewhere where the player can reach it. Be careful with hiding walnuts at a place that can *only* be reached through completing a ParrotUpgradePerch!
+
+## ParrotTile
+You type in the ParrotTile like this:
+```
+"ParrotTile": {
+    "X": 10,
+    "Y": 15
+}
+```
+The tile that you are defining is the bottom part of the pole. So the Parrot itself sits one tile higher than that. You will see when testing.
+
+## StickType
+You can add the field `"StickType": "Wood/Plant"` with either Wood or Plant as the value. If you don't use this field, it will just spawn in the Parrot, but if you do use it, it will place the pole as well. The plant type is the mostly used one and the wood type is like the one in the volcano. If you use this, you will also get seasonal variants of the Poles (mostly for the plant type). They will automatically apply, if your map does *not* have the Property LocationContext set to Island or Desert (see the [Maps](https://stardewvalleywiki.com/Modding:Maps#Other_location_metadata) page on the Wiki). However, if you want to use your own custom seasonal sheets,  you can either just not set StickType and place your own pole, or you can also edit the image files that I use for the Poles. To edit the non-seasonal one, write this:
+```
+{
+    "Action": "Load",
+    "Target": "ResoNight.GoldenWalnutFramework/ParrotSticks",
+    "FromFile": "assets/ParrotSticks/ParrotSticks.png" //example path
+}
+```
+for the seasonal versions, you can either edit the file of one specific season or just all together, assuming you also have four separate files:
+```
+{
+    "Action": "Load",
+    "Target": "ResoNight.GoldenWalnutFramework/{{Season}}_ParrotSticks",
+    "FromFile": "assets/ParrotSticks/{{Season}}_ParrotSticks.png"
+}
+```
+This replaces the spring_ParrotSticks file with your spring_ParrotSticks.png when it is spring, the summer_ParrotSticks file with your summer_ParrotSticks.png when it is summer and so on. Or you can just write one specific season. The target file is just a tiny 32*32 pixel image, so no need to use `EditImage`, just replace it. To find what the files look like, you can go into the GoldenWalnutFramework folder and open the assets and then ParrotSticks folder.
+
+## ParrotArea
+Example:
+```
+"ParrotArea": {
+    "X": 10,
+    "Y": 15,
+    "Width": 3,
+    "Height": 2
+}
+```
+This defines the area where the Parrots start their picking animation. Often times, this area will be the same like your [DestroyArea](#destroyareas) or [ToArea](#toarea) field, but you can place it wherever you want. As of now, this animation is not the most dynamic one and the amount of flying Parrots is set. So if you have a huge area that you override or destroy, you might want to test a bit, where the area looks the best.
+
+## StoneAnimation
+If you set `"StoneAnimation": true`, an alternative animation will play. Normally, when you complete a ParrotUpgradePerch, you hear this wooden, building kind of sound and you see planks flying around. If you set this to true, you trigger an actually unused animation by the game in that you rather see stone particles and the sound when you hit something with a pickaxe, as well as an explosion sound at the end. So especially if you want to for example open up a way into a cave or something, this would be a good usage. (Very small side note, no one should ever need this, but I do alter the name of the PUP for that reason. So please never do anything with the actual name of a PUP, just use its ID/Its MailFlag. If you definitely need the name, you can ask me on the SV Discord server (name is @ResoNight), how the name thingy works).
+
+## DestroyAreas
+Example:
+```
+"DestroyAreas": [
+    {
+        "X": 10,
+        "Y": 15,
+        "Width": 5,
+        "Height": 2,
+        "Layers": ["Buildings", "Buildings2", "Front"]
+    },
+    {
+        "X": 9,
+        "Y": 14,
+        "Layers": ["AlwaysFront"]
+]
+```
+
+The areas you define here are areas that get destroyed after completing the PUP. The Width and Height are optional and will default to 1. You might want to use DestroyAreas field instead of the [Map Override](#fromfile,-fromarea,-toarea) fields more often than you think. For example lets say you want to open up an entry to a cave. You could first design the map with an opened entry, with the walls on the Buildings layer obviously. Then you could place a closed wall on the Buildings2 layer, so putting it above the entry. Then one more tile on the buildings layer to block the entry. Now you could make the Parrot destroy all the tiles on the Buildings2 layer as well as the one tile on the Buildings layer that blocked the entry. By doing that, you don't have to trigger a Map Override.
+
+## FromFile, FromArea, ToArea
+Example:
+```
+"FromFile": "{{ModID}}\\Maps\\PUP_Overrides",
+"FromArea": {
+    "X": 0,
+    "Y": 0,
+    "Width": 5,
+    "Height": 4
+},
+"ToArea": {
+    "X": 40,
+    "Y": 45,
+    "Width": 5,
+    "Height": 4
+```
+Those three fields are required to trigger a Map Override. First the **FromFile** field. In this field, you put in the MapPath where you loaded the Map into the game. So somewhere in your json File, you should have something like this:
+```
+{
+    "Action": "Load",
+    "Target": "{{ModID}}\\Maps\\PUP_Overrides",
+    "FromFile": "assets/Maps/PUP_Overrides.tmx" //Example Path
+}
+```
+And then, whatever you put in here as a target is what you also put into the **FromFile** field. The **FromArea** and **ToArea** field work exactly like any typical [EditMap](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/action-editmap.md) action that you also use for Map Overrides. However, as of now at least, it doesn't support the [PatchModes](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/action-editmap.md#overlay-a-map) that Content Patcher has and everything works like the default PatchMode. Also, obviously, the Width and Height of the **FromArea** and **ToArea** field must be identical.
+
+## Condition
+Unlike the [Conditions](#conditions) field for Walnuts, this field does **NOT** support a GameStateQuery. ParrotUpgradePerches are pretty rigid structures and they can only have one single MailFlag as a condition. This means, if you need any kind of unique situation like an event for example, you should give a MailFlag to the *Host* (ALWAYS to the Host, everything works through the Host for this Framework) and this MailFlag is what you could put into this Condition field. Also this is useful to chain together PUPs, since you can just put the [ID](id-(pup)) of a PUP into the Condition field for another PUP (Remember, the ID of a PUP is also the MailFlag that it gives the player when completing the PUP).
+
+# Settings
+The third big field (though arguably it got a lot smaller in the coding process), is the Settings field. This is a very simple list that should look like this:
+
+```
+"Settings": {
+    "DisableWalnutCap": true,
+    "DisableSeasonalFeaturesForMaps": ["Map1", "Map2", ...]
+    "WalnutShops": {
+        "Shop1": 1,
+        "Shop2": 2,
+        ...
+    }
+}
+```
+Those are all the Settings that you can set.
+
+## DisableWalnutCap
+So normally, in the vanilla game, there is a hard-coded cap at 130 Walnuts. After having 130 Walnuts, giving the player any more than that will *not* increase the WalnutCounter. For this Framework, instead of completely disabling the Cap, I decided to move the Cap up to the new maximum of Walnuts. But for example, if you want to make Golden Walnuts an infinite resource, you can do this by disabling the Walnut Count. In that case, you also don't have to worry about any entries here at all, since I guess a broken Walnutcount is just part of it, when you make them infinitely obtainable. Keep in mind that this disables the cap for **all** mods that someone has simultaneously installed. You might also want to set this to true when testing stuff.
+
+## DisableSeasonalFeaturesForMaps
+This Framework also provides seasonal variants of the WalnutBush and seasonal variants of Palmtrees. They will automatically apply whenever the current Location does *not* have the `LocationContext` property set to `Island` or `Desert`. If you don't want them to apply, you can enter the Maps in this field. So for example this: `"DisableSeasonalFeaturesForMaps": ["Town", "Mountain"]` would disable the seasonal WalnutBush for the town and the Mountain, so only their summer variant stays. This is mostly useful when you want to spawn WalnutBushes indoors.
+
+## WalnutShops
+This is a ***VERY*** important field, but mostly C# territory. Do not get confused by the name of this field, it took me wayyy too long to think of any reasonable name. This field lets you register custom ways of spending walnuts, so that the whole walnut calculation is still correct. An entry for this field would look for example like this:
+```
+"WalnutShops": {
+    "{{ModID}}_GotFountainWalnuts": 1
+}
+```
+So what this means. The first half in this case is the "{{ModID}}_GotFountainWalnuts". This is the MailFlag that you give the host after he spent the amount of walnuts that you assigned here on the right. So this example here is a literal example of my secondary Mod **Island Expansion**, that uses this Framework. When the player goes to a fountain there, he can right click and he gets the option to throw a Walnut into the fountain. As soon as he says yes, I give the host the MailFlag "ResoNight.IslandExpansion_GotFountainWalnuts"
