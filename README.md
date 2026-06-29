@@ -64,7 +64,7 @@ This is a Framework Mod that lets you add custom Golden Walnuts and Parrot Upgra
 
 ## Installation
 1. **Install the latest version of [SMAPI](https://smapi.io/).**
-2. **Download Golden Walnut Framework** from [GitHub](https://github.com/ResoNight/GoldenWalnutFramework) or [Nexus Mods](https://www.nexusmods.com/stardewvalley/mods/???/)
+2. **Download Golden Walnut Framework** from [Nexus Mods](https://www.nexusmods.com/stardewvalley/mods/???/)
 3. **Unzip Golden Walnut Framework** into your `Stardew Valley\Mods` folder.
 
 ## Setting up your Content Pack
