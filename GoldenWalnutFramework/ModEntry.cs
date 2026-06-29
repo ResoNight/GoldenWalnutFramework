@@ -10,6 +10,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
+using StardewValley.Delegates;
 using StardewValley.Events;
 using StardewValley.Extensions;
 using StardewValley.GameData.Buildings;
@@ -22,6 +23,7 @@ using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
 using xTile;
 using xTile.Dimensions;
+using xTile.Tiles;
 
 namespace GoldenWalnutFramework
 {
@@ -44,6 +46,7 @@ namespace GoldenWalnutFramework
         public List<ParrotUpgradePerch> Custom_parrotUpgradePerches = [];
         public List<KeyValuePair<string, Vector2>> vanillaBushes = [];
         public HashSet<string> unobtainableWalnuts = [];
+        public Dictionary<string, string[]> GameStateQueryWalnutGroups = [];
 
         public List<string> vanillaWalnutIDs = [
             "Bush_IslandNorth_13_33", "Bush_IslandNorth_5_30", "Buried_IslandNorth_19_39", "Bush_IslandNorth_4_42", "Bush_IslandNorth_45_38", "Bush_IslandNorth_47_40", "IslandLeftPlantRestored", "IslandRightPlantRestored", "IslandBatRestored", "IslandFrogRestored",
@@ -79,7 +82,6 @@ namespace GoldenWalnutFramework
             helper.Events.Player.Warped += Player_Warped;
             helper.Events.Content.AssetRequested += Content_AssetRequested;
 
-
             helper.ConsoleCommands.Add("ShowAllWalnutIDs", "Gives you all the walnut IDs that you added to the game", cmds.ShowAllWalnutIDs);
             helper.ConsoleCommands.Add("ShowMailFlags", "Lists all the Mailflags that the host currently has", cmds.ShowMailFlags);
             helper.ConsoleCommands.Add("ShowWalnuts", "Lists all currently collected walnuts", cmds.ShowWalnuts);
@@ -87,6 +89,8 @@ namespace GoldenWalnutFramework
             helper.ConsoleCommands.Add("RemoveMailFlag", "Lets you remove a Mailflag. Mainly used for resetting ParrotUpgradePerches. Remember to save the day!", cmds.RemoveMailFlag);
             helper.ConsoleCommands.Add("RemoveWalnut", "Lets you remove a walnut, setting it back to it can be collected again. Remember to save the day!", cmds.RemoveWalnut);
 
+            GameStateQuery.Register("COMPLETED_WALNUTGROUP", cmds.WalnutGroupGSQ);
+            GameStateQuery.Register("FOUND_EVERY_WALNUT", cmds.WalnutCountGSQ);
 
             foreach (var vanillaBush in vanillaBushIDs)
             {
@@ -466,7 +470,6 @@ namespace GoldenWalnutFramework
             Helper.GameContent.InvalidateCache("TileSheets/bushes");
             Helper.GameContent.InvalidateCache("TerrainFeatures/tree_palm");
 
-            
             FillMainLists();
             CalculateCap();
             AddQiShopConditions();
@@ -479,8 +482,10 @@ namespace GoldenWalnutFramework
         {
             MainPatches.WalnutGroups.Clear();
             MainPatches.WalnutGroupsSingular.Clear();
+            MainPatches.WalnutGroupsHintConditions.Clear();
             MainPatches.SeparateWalnutGroups.Clear();
             MainPatches.SeparateWalnutGroupsSingular.Clear();
+            MainPatches.SeparateWalnutGroupsHintConditions.Clear();
             MainPatches.WalnutLocations.Clear();
             MainPatches.CustomPerches.Clear();
             MainPatches.QiShopFlags.Clear();
@@ -488,6 +493,7 @@ namespace GoldenWalnutFramework
             excludedMapsFromSeasonalFeatures.Clear();
             Custom_parrotUpgradePerches.Clear();
             unobtainableWalnuts.Clear();
+            GameStateQueryWalnutGroups.Clear();
             disableWalnutCap = false;
             customHintForToday = null;
 
@@ -553,12 +559,23 @@ namespace GoldenWalnutFramework
                             MainPatches.WalnutLocations.Add(walnut.Location!);
                         }
                     }
-                    if (walnut.Type.Equals("Bush", StringComparison.OrdinalIgnoreCase)) { mf.SpawnBushes(walnut); }
                     if (MainPatches.CustomWalnuts.Any(storedWalnut => storedWalnut.ID == walnut.ID))
                     {
                         Monitor.Log($"Multiple walnuts with this ID: '{walnut.ID}' have been detected. If you are a player, you can give yourself a walnut for each time that you see this error to compensate for the missing walnuts. To do this, type into the SMAPI Console 'debug item 73 x' and for x the amount of times you get this error. If you are a modder, DO NOT add the same ID twice. If you didn't do that, another mod that you have currently installed also used the same ID. Please just use another ID in that case. (Are you using the {{ModID}} token)?", LogLevel.Error);
                         continue;
                     }
+                    if (group.Value.HintConditions != null)
+                    {
+                        if (walnut.Conditions != null)
+                        {
+                            walnut.Conditions += $", {group.Value.HintConditions}";
+                        }
+                        else
+                        {
+                            walnut.Conditions = group.Value.HintConditions;
+                        }
+                    }
+                    if (walnut.Type.Equals("Bush", StringComparison.OrdinalIgnoreCase)) { mf.SpawnBushes(walnut); }
                     if (walnut.Count == null || walnut.Count == 1 || walnut.Type.Equals("Bush", StringComparison.OrdinalIgnoreCase))
                     {
                         currentWalnutIDs = [.. currentWalnutIDs.AddItem(walnut.ID!)];
@@ -576,13 +593,16 @@ namespace GoldenWalnutFramework
                 {
                     MainPatches.SeparateWalnutGroups.Add(new KeyValuePair<string, string[]>(group.Value.Hint, currentWalnutIDs));
                     MainPatches.SeparateWalnutGroupsSingular.Add(group.Value.Singular ?? "NoSingularAssigned");
+                    MainPatches.SeparateWalnutGroupsHintConditions.Add(group.Value.HintConditions ?? "");
                 }
                 else
                 {
                     walnutGroupCount++;
                     MainPatches.WalnutGroups.Add(new KeyValuePair<string, string[]>(group.Value.Hint, currentWalnutIDs));
                     MainPatches.WalnutGroupsSingular.Add(group.Value.Singular ?? "NoSingularAssigned");
+                    MainPatches.WalnutGroupsHintConditions.Add(group.Value.HintConditions ?? "");
                 }
+                GameStateQueryWalnutGroups[group.Key] = currentWalnutIDs;
             }
             foreach (var perch in json.ParrotUpgradePerches)
             {
@@ -607,6 +627,31 @@ namespace GoldenWalnutFramework
                     }
                     perchName += "-_______";
                 }
+                if (perch.StickType != null)
+                {
+                    TileSheet tileSheet;
+                    if (perchLocation.InDesertContext() || perchLocation.InIslandContext() || excludedMapsFromSeasonalFeatures.Contains(perch.Location!, StringComparer.OrdinalIgnoreCase))
+                    {
+                        tileSheet = new("zzz_GWF/ParrotSticks", perchLocation.Map, "ResoNight.GoldenWalnutFramework/ParrotSticks", new Size(2, 2), new Size(16, 16));
+                    }
+                    else
+                    {
+                        tileSheet = new("zzz_GWF/ParrotSticks", perchLocation.Map, $"ResoNight.GoldenWalnutFramework/{Game1.currentSeason}_ParrotSticks", new Size(2, 2), new Size(16, 16));
+                    }
+                        
+                    perchLocation.Map.AddTileSheet(tileSheet);
+
+                    if (perch.StickType.Equals("Wood", StringComparison.OrdinalIgnoreCase))
+                    {
+                        perchLocation.setMapTile((int)perch.ParrotTile!.X!, (int)perch.ParrotTile.Y!, 2, "Buildings", "zzz_GWF/ParrotSticks");
+                        perchLocation.setMapTile((int)perch.ParrotTile!.X!, (int)perch.ParrotTile.Y! - 1, 0, "Front", "zzz_GWF/ParrotSticks");
+                    }
+                    else if (perch.StickType.Equals("Plant", StringComparison.OrdinalIgnoreCase))
+                    {
+                        perchLocation.setMapTile((int)perch.ParrotTile!.X!, (int)perch.ParrotTile.Y!, 3, "Buildings", "zzz_GWF/ParrotSticks");
+                        perchLocation.setMapTile((int)perch.ParrotTile!.X!, (int)perch.ParrotTile.Y! - 1, 1, "Front", "zzz_GWF/ParrotSticks");
+                    }
+                }
                 if (!Game1.MasterPlayer.mailReceived.Contains(perch.ID))
                 {
                     Custom_parrotUpgradePerches.Add(new ParrotUpgradePerch(perchLocation, new Point(perch.ParrotTile!.X!.Value, perch.ParrotTile!.Y!.Value), new Microsoft.Xna.Framework.Rectangle(perch.ParrotArea!.X!.Value, perch.ParrotArea!.Y!.Value, perch.ParrotArea!.Width!.Value, perch.ParrotArea!.Height!.Value), perch.Nuts!.Value, () => { Game1.MasterPlayer.mailReceived.Add(perch.ID); SpentWalnutsForPUPs += (int)perch.Nuts; }, () => false, perchName, perch.Condition ?? ""));
@@ -623,22 +668,22 @@ namespace GoldenWalnutFramework
 
                 MainPatches.CustomPerches.Add(perch);
             }
-            foreach (var entry in json.Settings.WalnutShops ?? [])
+            foreach (var entry in json.Settings.SpentWalnuts ?? [])
             {
                 string? mailFlag = entry.Key;
                 if (string.IsNullOrWhiteSpace(mailFlag))
                 {
-                    Monitor.Log("You added an empty MailFlag in the WalnutShops field!", LogLevel.Error);
+                    Monitor.Log("You added an empty MailFlag in the SpentWalnuts field!", LogLevel.Error);
                     continue;
                 }
                 if (MainPatches.CustomPerches.Any(perch => perch.ID == mailFlag))
                 {
-                    Monitor.Log($"You added the MailFlag '{mailFlag}' in the WalnutShops field, but this MailFlag is already one of your ParrotUpgradePerches. They are being automatically added, so this entry will be ignored", LogLevel.Warn);
+                    Monitor.Log($"You added the MailFlag '{mailFlag}' in the SpentWalnuts field, but this MailFlag is already one of your ParrotUpgradePerches. They are being automatically added, so this entry will be ignored", LogLevel.Warn);
                     continue;                                    
                 }
                 if (entry.Value < 0)
                 {
-                    Monitor.Log("Please do not set a negative amount of Walnuts for your MailFlag in the WalnutShops field!", LogLevel.Error);
+                    Monitor.Log("Please do not set a negative amount of Walnuts for your MailFlag in the SpentWalnuts field!", LogLevel.Error);
                     continue;
                 }
                 MainPatches.QiShopFlags.Add(new KeyValuePair<string, int>(mailFlag, entry.Value));
@@ -988,11 +1033,17 @@ namespace GoldenWalnutFramework
                     Helper.GameContent.InvalidateCache("TerrainFeatures/tree_palm");
                 }
             }
+            foreach (var walnut in MainPatches.CustomWalnuts)
+            {
+                if (!walnut.Type!.Equals("Bush", StringComparison.OrdinalIgnoreCase)) { continue; }
+                if (!walnut.Location!.Equals(e.NewLocation.Name, StringComparison.OrdinalIgnoreCase)) { continue; }
+                mf!.SpawnBushes(walnut);
+            }
         }
 
         private void Content_AssetRequested(object? sender, AssetRequestedEventArgs e)
         {
-            if (e.NameWithoutLocale.IsEquivalentTo("Mods/GoldenWalnutFramework/Data"))
+            if (e.Name.IsEquivalentTo("Mods/GoldenWalnutFramework/Data"))
             {
                 e.LoadFrom(
                     () => new BaseJSON
@@ -1004,9 +1055,7 @@ namespace GoldenWalnutFramework
                     AssetLoadPriority.Exclusive
                 );
             }
-
-
-            if (e.Name.IsEquivalentTo("TileSheets/bushes"))
+            else if (e.Name.IsEquivalentTo("TileSheets/bushes"))
             {
                 if (seasonalTerrainFeatures == true)
                 {
@@ -1037,23 +1086,16 @@ namespace GoldenWalnutFramework
             {
                 if (seasonalTerrainFeatures == true)
                 {
-                    if (Game1.currentSeason.Equals("spring"))
-                    {
-                        e.LoadFromModFile<Texture2D>("assets/TerrainFeatures/spring_tree_palm2.png", AssetLoadPriority.Low);
-                    }
-                    else if (Game1.currentSeason.Equals("summer"))
-                    {
-                        e.LoadFromModFile<Texture2D>("assets/TerrainFeatures/summer_tree_palm2.png", AssetLoadPriority.Low);
-                    }
-                    else if (Game1.currentSeason.Equals("fall"))
-                    {
-                        e.LoadFromModFile<Texture2D>("assets/TerrainFeatures/fall_tree_palm2.png", AssetLoadPriority.Low);
-                    }
-                    else if (Game1.currentSeason.Equals("winter"))
-                    {
-                        e.LoadFromModFile<Texture2D>("assets/TerrainFeatures/winter_tree_palm2.png", AssetLoadPriority.Low);
-                    }
+                    e.LoadFromModFile<Texture2D>($"assets/TerrainFeatures/{Game1.currentSeason}_tree_palm2.png", AssetLoadPriority.Low);
                 }
+            }
+            else if (e.Name.IsEquivalentTo("ResoNight.GoldenWalnutFramework/ParrotSticks"))
+            {
+                e.LoadFromModFile<Texture2D>("assets/ParrotSticks/ParrotSticks.png", AssetLoadPriority.Low);
+            }
+            else if (e.Name.IsEquivalentTo($"ResoNight.GoldenWalnutFramework/{Game1.currentSeason}_ParrotSticks"))
+            {
+                e.LoadFromModFile<Texture2D>($"assets/ParrotSticks/{Game1.currentSeason}_ParrotSticks.png", AssetLoadPriority.Low);
             }
         }
 
@@ -1098,12 +1140,12 @@ namespace GoldenWalnutFramework
                 List<KeyValuePair<string, int>> valid_customHints = [];
                 KeyValuePair<string, int> valid_customHint = new();
                 var groups = MainPatches.SeparateWalnutGroups;
-                foreach (var group in MainPatches.SeparateWalnutGroups)
+                for (int i = 0; i < groups.Count; i++)
                 {
                     int missingNuts = 0;
-                    if (MainPatches.MissingTheseNuts(ref missingNuts, group.Value))
+                    if (MainPatches.MissingTheseNuts(ref missingNuts, i, true, groups[i].Value))
                     {
-                        valid_customHints.Add(new KeyValuePair<string, int>(group.Key, missingNuts));
+                        valid_customHints.Add(new KeyValuePair<string, int>(groups[i].Key, missingNuts));
                     }
                 }
                 if (valid_customHints.Count == 0) { return; }
@@ -1137,7 +1179,6 @@ namespace GoldenWalnutFramework
                             }
                         }
                     }
-                    Monitor.Log(customHint, LogLevel.Debug);
                     __instance.hintShowTime = 2f;
                     __instance.hintDialogues.Add("Custom Walnuts");
                     __instance.hintDialogues.Add(string.Format(customHint, valid_customHint.Value));
@@ -1211,7 +1252,8 @@ namespace GoldenWalnutFramework
             var areas = walnut.Areas;
             var monstertypes = walnut.MonsterTypes;
             var stonetypes = walnut.StoneTypes;
-            var condition = walnut.Conditions;
+            var conditions = walnut.Conditions;
+
 
             //double check the entries
             if (string.IsNullOrWhiteSpace(id))
@@ -1236,15 +1278,14 @@ namespace GoldenWalnutFramework
                     m.Monitor.Log($"Group '{groupKey}', Walnut '{id}': A Walnut with type Bush needs the following entries: ID, Type, Location, X, Y", LogLevel.Error);
                     return false;
                 }
-                if (new object?[] { count, dropatonce, chance, areas, monstertypes, stonetypes, condition }.Any(x => x != null))
+                if (new object?[] { count, dropatonce, chance, areas, monstertypes, stonetypes }.Any(x => x != null))
                 {
-                    m.Monitor.Log($"Group '{groupKey}', Walnut '{id}': A Walnut with Type Bush cannot have any of the following entries: Count, DropAtOnce, Chance, Areas, MonsterTypes, StoneTypes, Condition. Any of those entries will be ignored", LogLevel.Warn);
+                    m.Monitor.Log($"Group '{groupKey}', Walnut '{id}': A Walnut with Type Bush cannot have any of the following entries: Count, DropAtOnce, Chance, Areas, MonsterTypes, StoneTypes. Any of those entries will be ignored", LogLevel.Warn);
                     count = null;
                     dropatonce = null;
                     chance = null;
                     areas = null;
                     monstertypes = stonetypes = null;
-                    condition = null;
                 }
             }
             if (type == "buried")
@@ -1309,11 +1350,11 @@ namespace GoldenWalnutFramework
             }
             else if (type == "custom")
             {
-                if (new object?[] { l, x, y, areas, chance, monstertypes, condition }.Any(x => x != null))
+                if (new object?[] { l, x, y, areas, chance, monstertypes, conditions }.Any(x => x != null))
                 {
-                    if (condition != null)
+                    if (conditions != null)
                     {
-                        m.Monitor.Log($"Group '{groupKey}', Walnut '{id}': A Walnut set to Custom cannot have a condition, because you have to make the whole dropping logic yourself. You have to add the condition in your own code for the walnut", LogLevel.Warn);
+                        m.Monitor.Log($"Group '{groupKey}', Walnut '{id}': A Walnut set to Custom cannot have a conditions field, because you have to make the whole dropping logic yourself. You have to add the conditions in your own code for the walnut", LogLevel.Warn);
                     }
                     else
                     {
@@ -1326,7 +1367,7 @@ namespace GoldenWalnutFramework
                     areas = null;
                     monstertypes = null;
                     stonetypes = null;
-                    condition = null;
+                    conditions = null;
                 }
             }
 
@@ -1381,6 +1422,7 @@ namespace GoldenWalnutFramework
         public void SpawnBushes(CustomWalnut walnut)
         {
             GameLocation l = Game1.getLocationFromName(walnut.Location);
+            if (!GameStateQuery.CheckConditions(walnut.Conditions)) { return; }
             Vector2 tilePos = new((int)walnut.X!, (int)walnut.Y!);
             foreach (var ltf in l.largeTerrainFeatures)
             {
@@ -1712,6 +1754,29 @@ namespace GoldenWalnutFramework
                 m.Monitor.Log("Please add the ID of the walnut after the Command! To look up all the Walnuts that the team has collected, use the command ShowWalnuts!", LogLevel.Error);
             }
         }
+
+        public bool WalnutGroupGSQ(string[] query, GameStateQueryContext context)
+        {
+            if (query.Length < 2)
+            {
+                m.Monitor.Log("For the GameStateQuery COMPLETED_WALNUTGROUP, you must also type a group after it! In this state, it will always just give true!", LogLevel.Warn);
+                return true;
+            }
+            if (m.GameStateQueryWalnutGroups.TryGetValue(query[1], out var walnutIDs))
+            {
+                return walnutIDs.All(Game1.player.team.collectedNutTracker.Contains);
+            }
+            else
+            {
+                m.Monitor.Log($"For the GameStateQuery COMPLETED_WALNUTGROUP, the group '{query[1]}' could not be found and it will therefore always be true!", LogLevel.Warn);
+                return true;
+            }
+        }
+
+        public bool WalnutCountGSQ(string[] query, GameStateQueryContext context)
+        {
+            return Game1.netWorldState.Value.GoldenWalnutsFound >= m.GoldenWalnutCap;
+        }
     }
 
 
@@ -1723,8 +1788,10 @@ namespace GoldenWalnutFramework
         public static HashSet<string> WalnutLocations = new(StringComparer.OrdinalIgnoreCase);
         public static List<KeyValuePair<string, string[]>> WalnutGroups = [];
         public static List<string> WalnutGroupsSingular = [];
+        public static List<string> WalnutGroupsHintConditions = [];
         public static List<KeyValuePair<string, string[]>> SeparateWalnutGroups = [];
         public static List<string> SeparateWalnutGroupsSingular = [];
+        public static List<string> SeparateWalnutGroupsHintConditions = [];
         public static List<KeyValuePair<string, int>> QiShopFlags = [];
         public static List<CustomWalnut> CustomWalnuts = [];
         public static List<CustomParrotUpgradePerch> CustomPerches = [];
@@ -1825,6 +1892,8 @@ namespace GoldenWalnutFramework
                         yield return new CodeInstruction(OpCodes.Stloc_S, (byte)6);
                         yield return new CodeInstruction(OpCodes.Ldloca_S, (byte)6);
                         yield return new CodeInstruction(OpCodes.Ldc_I4, index);
+                        yield return new CodeInstruction(OpCodes.Ldc_I4_0);
+                        yield return new CodeInstruction(OpCodes.Ldc_I4, index);
                         yield return new CodeInstruction(OpCodes.Call, typeof(MainPatches).GetMethod(nameof(WalnutGroupWalnutsForTranspiler)));
                         yield return new CodeInstruction(OpCodes.Call, typeof(MainPatches).GetMethod(nameof(MissingTheseNuts)));
                         yield return new CodeInstruction(OpCodes.Brfalse_S, skipAdd);
@@ -1867,7 +1936,7 @@ namespace GoldenWalnutFramework
             return WalnutGroups[index].Key;
         }
 
-        public static bool MissingTheseNuts(ref int __result, params string[] WalnutIDs)
+        public static bool MissingTheseNuts(ref int __result, int index, bool separateGroups, params string[] WalnutIDs)
         {
             int num = 0;
             foreach (string id in WalnutIDs)
@@ -1878,6 +1947,20 @@ namespace GoldenWalnutFramework
                 }
             }
             __result += num;
+            if (!separateGroups)
+            {
+                if (!GameStateQuery.CheckConditions(WalnutGroupsHintConditions[index]))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (!GameStateQuery.CheckConditions(SeparateWalnutGroupsHintConditions[index]))
+                {
+                    return false;
+                }
+            }
             return num > 0;
         }
 
@@ -2327,6 +2410,7 @@ namespace GoldenWalnutFramework
         public string? Singular { get; set; }
         public bool? SeparateHint { get; set; }
         public bool? ShowThisHint { get; set; }
+        public string? HintConditions { get; set; }
         public List<CustomWalnut>? Walnuts { get; set; }
     }
 
@@ -2337,6 +2421,7 @@ namespace GoldenWalnutFramework
         public string? Location { get; set; }
         public bool? StoneAnimation { get; set; }
         public int? Nuts { get; set; }
+        public string? StickType { get; set; }
         public ParrotTile? ParrotTile { get; set; }
         public JSONRect? ParrotArea { get; set; }
         public List<DestroyArea>? DestroyAreas { get; set; }
@@ -2395,7 +2480,7 @@ namespace GoldenWalnutFramework
     {
         public bool? DisableWalnutCap {  get; set; }
         public List<string>? DisableSeasonalFeaturesForMaps  { get; set; }
-        public Dictionary<string, int>? WalnutShops { get; set; }
+        public Dictionary<string, int>? SpentWalnuts { get; set; }
 
     }
 }
