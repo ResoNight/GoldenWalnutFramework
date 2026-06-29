@@ -1,5 +1,7 @@
 # Golden Walnut Framework (GWF)
 
+![Bush Ring image](docs/images/Bush_Ring.png)
+
 This is a Framework Mod that lets you add custom Golden Walnuts and Parrot Upgrade Perches. You can add Walnut Bushes, bury Walnuts, drop them when you destroy a Stone and much more. And you can add new Parrot Upgrade Perches (The Parrots that sit on a stick and where you can trade Walnuts for a Map change) and trigger Map Overrides, destroy some tiles or anything else. This guide explains, how you have to do everything when you are working with [Content Patcher](https://www.nexusmods.com/stardewvalley/mods/1915). If you are just making a Mod via C#, I must say, I have no idea how all this works. I assume though that you know yourself how to add entries into a jsonfile, if you are already deciding to not use Content Patcher for some reason. Just note that the Target file is `Mods/GoldenWalnutFramework/Data`.
 
 
