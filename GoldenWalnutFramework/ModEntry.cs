@@ -498,7 +498,7 @@ namespace GoldenWalnutFramework
             customHintForToday = null;
 
             int walnutGroupCount = 0;
-
+            Helper.GameContent.InvalidateCache("Mods/GoldenWalnutFramework/Data");
             var json = Game1.content.Load<BaseJSON>("Mods/GoldenWalnutFramework/Data");
 
             mf!.RegisterJSONSettings(json.Settings);
