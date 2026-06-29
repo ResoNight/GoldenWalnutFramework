@@ -1,0 +1,916 @@
+{
+    "Changes": [
+        {
+            "Action": "EditData",
+            "Target": "Mods/GoldenWalnutFramework/Data",
+            "Entries": {
+                "GoldenWalnuts": {
+                    "{{ModID}}_Island_W_BushWithChair": {
+                        "Hint": "{{i18n:Island_W_BushWithChair}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Island_W_BushWithChair",
+                                "Type": "Bush",
+                                "Location": "IslandWest",
+                                "X": 20,
+                                "Y": 54
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Island_W_BuriedAtRuins": {
+                        "Hint": "{{i18n:Island_W_BuriedAtRuins}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Island_W_BuriedAtRuins",
+                                "Type": "Buried",
+                                "Location": "IslandWest",
+                                "X": 38,
+                                "Y": 7
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Island_W_BuriedAtSerpent": {
+                        "Hint": "{{i18n:Island_W_BuriedAtSerpent}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Island_W_BuriedAtSerpent",
+                                "Type": "Buried",
+                                "Location": "IslandWest",
+                                "X": 31,
+                                "Y": 7
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Island_NW_Bushes": {
+                        "Hint": "{{i18n:Island_NW_Bushes}}",
+                        "SeparateHint": true,
+                        "Singular": "{{i18n:Island_NW_Bushes_S}}",
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Bush_Island_NW_42_98",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 42,
+                                "Y": 98
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Island_NW_75_77",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 75,
+                                "Y": 77
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Island_NW_75_39",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 75,
+                                "Y": 39
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Island_NW_106_24",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 106,
+                                "Y": 24
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Island_NW_82_95",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 82,
+                                "Y": 95
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Island_NW_27_71",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 27,
+                                "Y": 71
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Island_NW_Buried": {
+                        "Hint": "{{i18n:Island_NW_Buried}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Buried_Island_NW_73_20",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 73,
+                                "Y": 20
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_Island_NW_24_30",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 24,
+                                "Y": 30
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_Island_NW_10_97",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 10,
+                                "Y": 97
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_Island_NW_93_40",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 93,
+                                "Y": 40
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Island_NW_Fishing_FarNorth": {
+                        "Hint": "{{i18n:Island_NW_Fishing_FarNorth}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Island_NW_Fishing_FarNorth",
+                                "Type": "Fishing",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 84,
+                                "Y": 6
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Island_NW_Fishing_NearLog": {
+                        "Hint": "{{i18n:Island_NW_Fishing_NearLog}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Island_NW_Fishing_NearLog",
+                                "Type": "Fishing",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "Areas": [
+                                    {
+                                        "X": 72,
+                                        "Y": 27,
+                                        "Width": 5,
+                                        "Height": 5
+                                    }
+                                ],
+                                "Count": 3,
+                                "Chance": 0.25
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Island_NW_Stone": {
+                        "Hint": "{{i18n:Island_NW_Stone}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Island_NW_Stone",
+                                "Type": "Stone",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "Count": 5,
+                                "Chance": 0.1,
+                                "DropAtOnce": "1/2",
+                                "StoneTypes": [
+                                    "{{ModID}}_ExpStoneNode"
+                                ]
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Island_NW_WaterfallCave": {
+                        "Hint": "{{i18n:Island_NW_WaterfallCave}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Island_NW_WaterfallCave",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 42,
+                                "Y": 19,
+                                "Count": 3
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Volcano_Fishing": {
+                        "Hint": "{{i18n:Volcano_Fishing}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Volcano_Fishing",
+                                "Type": "Fishing",
+                                "Location": "{{ModID}}_Volcano"
+                            }
+                        ]
+                    },
+                    "{{ModID}}_MS_Island_Bushes": {
+                        "Hint": "{{i18n:MS_Island_Bushes}}",
+                        "SeparateHint": true,
+                        "Singular": "{{i18n:MS_Island_Bushes_S}}",
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Bush_MS_Island_42_40",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 42,
+                                "Y": 40
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_MS_Island_37_31",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 37,
+                                "Y": 31
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_MS_Island_28_74",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 28,
+                                "Y": 74
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_MS_Island_40_28",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 40,
+                                "Y": 28
+                            }
+                        ]
+                    },
+                    "{{ModID}}_MS_Island_Buried": {
+                        "Hint": "{{i18n:MS_Island_Buried}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Buried_MS_Island_23_47",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 23,
+                                "Y": 47
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_MS_Island_61_21",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 61,
+                                "Y": 21
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_MS_Island_82_83",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 82,
+                                "Y": 83
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_MS_Island_81_52",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 81,
+                                "Y": 52
+                            }
+                        ]
+                    },
+                    "{{ModID}}_MS_Island_Fishing": {
+                        "Hint": "{{i18n:MS_Island_Fishing}}",
+                        "SeparateHint": true,
+                        "Singular": "{{i18n:MS_Island_Fishing_S}}",
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Fishing_MS_Island_51_90",
+                                "Type": "Fishing",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 51,
+                                "Y": 90
+                            },
+                            {
+                                "ID": "{{ModID}}_Fishing_MS_Island_99_49",
+                                "Type": "Fishing",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "X": 99,
+                                "Y": 49
+                            }
+                        ]
+                    },
+                    "{{ModID}}_MS_Island_Monster": {
+                        "Hint": "{{i18n:MS_Island_Monster}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_MS_Island_Monster",
+                                "Type": "MonsterLoot",
+                                "Location": "{{ModID}}_Moonscythe_Island",
+                                "Count": 5,
+                                "DropAtOnce": "1/2",
+                                "Chance": 0.25,
+                                "MonsterTypes": [
+                                    "Sludge"
+                                ]
+                            }
+                        ]
+                    },
+                    "{{ModID}}_F_Island_Bushes": {
+                        "Hint": "{{i18n:F_Island_Bushes}}",
+                        "SeparateHint": true,
+                        "Singular": "{{i18n:F_Island_Bushes_S}}",
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Bush_F_Island_103_36",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 103,
+                                "Y": 36
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_F_Island_144_33",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 144,
+                                "Y": 33
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_F_Island_89_57",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 89,
+                                "Y": 57
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_F_Island_21_49",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 21,
+                                "Y": 49
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_F_Island_89_32",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 89,
+                                "Y": 32
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_F_Island_49_57",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 49,
+                                "Y": 57
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_F_Island_40_20",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 40,
+                                "Y": 20
+                            }
+                        ]
+                    },
+                    "{{ModID}}_F_Island_Buried": {
+                        "Hint": "{{i18n:F_Island_Buried}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_127_125",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 127,
+                                "Y": 125
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_131_145",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 131,
+                                "Y": 145
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_152_85",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 152,
+                                "Y": 85
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_113_122",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 113,
+                                "Y": 122
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_103_105",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 103,
+                                "Y": 105
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_46_23",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 46,
+                                "Y": 23
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_84_54",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 84,
+                                "Y": 54
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_29_26",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 29,
+                                "Y": 26
+                            }
+                        ]
+                    },
+                    "{{ModID}}_F_Island_Fishing_Pond": {
+                        "Hint": "{{i18n:F_Island_Fishing_Pond}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_F_Island_Fishing_Pond",
+                                "Type": "Fishing",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 138,
+                                "Y": 78
+                            }
+                        ]
+                    },
+                    "{{ModID}}_F_Island_Fishing_Center": {
+                        "Hint": "{{i18n:F_Island_Fishing_Center}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_F_Island_Fishing_Center",
+                                "Type": "Fishing",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "Areas": [
+                                    {
+                                        "X": 93,
+                                        "Y": 95,
+                                        "Width": 2,
+                                        "Height": 2
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Maze_Bushes": {
+                        "Hint": "{{i18n:Maze_Bushes}}",
+                        "SeparateHint": true,
+                        "Singular": "{{i18n:Maze_Bushes_S}}",
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_73_104",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 73,
+                                "Y": 104
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_63_117",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 63,
+                                "Y": 117
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_88_113",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 88,
+                                "Y": 113
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_94_113",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 94,
+                                "Y": 113
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_60_132",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 60,
+                                "Y": 132
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_27_119",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 27,
+                                "Y": 119
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_37_104",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 37,
+                                "Y": 104
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_46_135",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 46,
+                                "Y": 135
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_31_126",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 31,
+                                "Y": 126
+                            },
+                            {
+                                "ID": "{{ModID}}_Bush_Maze_69_132",
+                                "Type": "Bush",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 69,
+                                "Y": 132
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Maze_Buried": {
+                        "Hint": "{{i18n:Maze_Buried}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Buried_Maze_77_111",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 77,
+                                "Y": 111
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_Maze_40_101",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 40,
+                                "Y": 101
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_Maze_15_123",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 15,
+                                "Y": 123
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_Maze_31_151",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 31,
+                                "Y": 151
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Maze_Fishing_Pond": {
+                        "Hint": "{{i18n:Maze_Fishing_Pond}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Maze_Fishing_Pond",
+                                "Type": "Fishing",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "Areas": [
+                                    {
+                                        "X": 75,
+                                        "Y": 146,
+                                        "Width": 2
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Maze_GoldenSlime": {
+                        "Hint": "{{i18n:Maze_GoldenSlime}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Maze_GoldenSlime",
+                                "Type": "MonsterLoot",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "Count": 3,
+                                "DropAtOnce": 3,
+                                "MonsterTypes": [
+                                    "Tiger Slime"
+                                ]
+                            }
+                        ]
+                    },
+                    "{{ModID}}_RailRoad_Bush": {
+                        "Hint": "{{i18n:RailRoad_Bush}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_RailRoad_Bush",
+                                "Type": "Bush",
+                                "Location": "Railroad",
+                                "X": 20,
+                                "Y": 57
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Sunroom_Bush": {
+                        "Hint": "{{i18n:Sunroom_Bush}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Sunroom_Bush",
+                                "Type": "Bush",
+                                "Location": "Sunroom",
+                                "X": 9,
+                                "Y": 11
+                            }
+                        ]
+                    },
+                    "{{ModID}}_Secret_Notes": {
+                        "Hint": "{{i18n:Secret_Notes}}",
+                        "SeparateHint": true,
+                        "Walnuts": [
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_39_153",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 39,
+                                "Y": 153,
+                                "Conditions": "ichortower.SecretNoteFramework_PLAYER_HAS_MOD_NOTE Any {{ModID}}_SecretNote_Buried_F_Island_1"
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_F_Island_81_147",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_Farming_Island",
+                                "X": 81,
+                                "Y": 147,
+                                "Conditions": "ichortower.SecretNoteFramework_PLAYER_HAS_MOD_NOTE Any {{ModID}}_SecretNote_Buried_F_Island_2"
+                            },
+                            {
+                                "ID": "{{ModID}}_Buried_Island_NW_33_38",
+                                "Type": "Buried",
+                                "Location": "{{ModID}}_islandNorthWest",
+                                "X": 33,
+                                "Y": 38,
+                                "Conditions": "ichortower.SecretNoteFramework_PLAYER_HAS_MOD_NOTE Any {{ModID}}_SecretNote_Buried_Island_NW_1"
+                            },
+                            {
+                                "ID": "{{ModID}}_F_Island_FountainWalnuts",
+                                "Type": "Custom",
+                                "Count": 5
+                            }
+                        ]
+                    }
+                },
+                "ParrotUpgradePerches": [
+                    {
+                        "ID": "{{ModID}}_Boulder_Removed",
+                        "Location": "{{ModID}}_islandNorthWest",
+                        "StoneAnimation": true,
+                        "Nuts": 5,
+                        "ParrotTile": {
+                            "x": 40,
+                            "y": 50
+                        },
+                        "Parrotarea": {
+                            "x": 36,
+                            "y": 45,
+                            "Width": 4,
+                            "Height": 4
+                        },
+                        "DestroyAreas": [
+                            {
+                                "x": 36,
+                                "y": 45,
+                                "Width": 4,
+                                "Height": 4,
+                                "Layers": [
+                                    "Buildings",
+                                    "Front",
+                                    "AlwaysFront"
+                                ]
+                            }
+                        ],
+                        "Condition": "{{ModID}}_Visited_Volcano"
+                    },
+                    {
+                        "ID": "{{ModID}}_IslandW_Added_Stairs",
+                        "Location": "IslandWest",
+                        "Nuts": 5,
+                        "ParrotTile": {
+                            "x": 54,
+                            "y": 9
+                        },
+                        "Parrotarea": {
+                            "x": 46,
+                            "y": 7,
+                            "Width": 6,
+                            "Height": 6
+                        },
+                        "FromArea": {
+                            "x": 0,
+                            "y": 0,
+                            "Width": 6,
+                            "Height": 6
+                        },
+                        "FromFile": "{{ModID}}\\Maps\\Exp_PUP_Maps",
+                        "Condition": "{{ModID}}_Visited_Farming_Island"
+                    },
+                    {
+                        "ID": "{{ModID}}_IslandN_Added_Stairs",
+                        "Location": "IslandNorth",
+                        "Nuts": 5,
+                        "ParrotTile": {
+                            "x": 12,
+                            "y": 33
+                        },
+                        "StickType": "Wood",
+                        "Parrotarea": {
+                            "x": 0,
+                            "y": 25,
+                            "Width": 6,
+                            "Height": 6
+                        },
+                        "FromArea": {
+                            "x": 6,
+                            "y": 0,
+                            "Width": 6,
+                            "Height": 6
+                        },
+                        "FromFile": "{{ModID}}\\Maps\\Exp_PUP_Maps",
+                        "Condition": "{{ModID}}_Visited_Farming_Island"
+                    },
+                    {
+                        "ID": "{{ModID}}_Moonscythe_Island_Repaired_Ship",
+                        "Location": "{{ModID}}_Moonscythe_Island",
+                        "Nuts": 20,
+                        "ParrotTile": {
+                            "x": 56,
+                            "y": 60
+                        },
+                        "Parrotarea": {
+                            "x": 44,
+                            "y": 62,
+                            "Width": 18,
+                            "Height": 8
+                        },
+                        "FromFile": "{{ModID}}\\Maps\\Exp_island_Ship.tmx",
+                        "FromArea": {
+                            "x": 0,
+                            "y": 0,
+                            "Width": 23,
+                            "Height": 22
+                        },
+                        "ToArea": {
+                            "x": 43,
+                            "y": 59,
+                            "Width": 23,
+                            "Height": 22
+                        }
+                    },
+                    {
+                        "ID": "{{ModID}}_IslandNW_Bridge_Repaired",
+                        "Location": "{{ModID}}_islandNorthWest",
+                        "Nuts": 5,
+                        "ParrotTile": {
+                            "x": 105,
+                            "y": 97
+                        },
+                        "Parrotarea": {
+                            "x": 98,
+                            "y": 94,
+                            "Width": 6,
+                            "Height": 4
+                        },
+                        "DestroyAreas": [
+                            {
+                                "x": 98,
+                                "y": 94,
+                                "Width": 6,
+                                "Height": 4,
+                                "Layers": [
+                                    "AlwaysFront"
+                                ]
+                            },
+                            {
+                                "X": 103,
+                                "Y": 96,
+                                "Layers": [
+                                    "AlwaysFront2"
+                                ]
+                            }
+                        ],
+                        "Condition": "{{ModID}}_Visited_Farming_Island"
+                    },
+                    {
+                        "ID": "{{ModID}}_F_Island_Maze_Shortcuts",
+                        "Location": "{{ModID}}_Farming_Island",
+                        "Nuts": 5,
+                        "ParrotTile": {
+                            "X": 90,
+                            "Y": 106
+                        },
+                        "ParrotArea": {
+                            "X": 87,
+                            "Y": 124,
+                            "Width": 2,
+                            "Height": 2
+                        },
+                        "DestroyAreas": [
+                            {
+                                "X": 87,
+                                "Y": 124,
+                                "Width": 2,
+                                "Height": 2,
+                                "Layers": [
+                                    "Buildings"
+                                ]
+                            },
+                            {
+                                "X": 37,
+                                "Y": 117,
+                                "Width": 2,
+                                "Height": 2,
+                                "Layers": [
+                                    "Buildings"
+                                ]
+                            },
+                            {
+                                "X": 66,
+                                "Y": 124,
+                                "Width": 2,
+                                "Height": 2,
+                                "Layers": [
+                                    "Buildings"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "ID": "{{ModID}}_IslandF_Removed_Boulder_Volcano",
+                        "Location": "{{ModID}}_Farming_Island",
+                        "Nuts": 1,
+                        "ParrotTile": {
+                            "X": 29,
+                            "Y": 130
+                        },
+                        "parrotArea": {
+                            "X": 88,
+                            "Y": 47,
+                            "Width": 2,
+                            "Height": 2
+                        },
+                        "DestroyAreas": [
+                            {
+                                "X": 88,
+                                "Y": 47,
+                                "Width": 2,
+                                "Height": 2,
+                                "Layers": [
+                                    "Buildings"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "ID": "TestPUP",
+                        "Location": "Town",
+                        "Nuts": 1,
+                        "StickType": "Plant",
+                        "StoneAnimation": true,
+                        "ParrotTile": {
+                            "X": 29,
+                            "Y": 67
+                        },
+                        "ParrotArea": {
+                            "X": 45,
+                            "Y": 45,
+                            "Width": 2,
+                            "Height": 2
+                        }
+                    }
+                ],
+                "Settings": {
+                    "SpentWalnuts": {
+                        "{{ModID}}_GotFountainWalnuts": 1
+                    }
+                }
+            }
+        },
+        {
+            "Action": "Load",
+            "Target": "{{ModID}}\\Maps\\Exp_PUP_Maps",
+            "FromFile": "assets\\Maps\\Exp_PUP_Maps.tmx"
+        },
+        {
+            "Action": "Load",
+            "Target": "{{ModID}}\\Maps\\Exp_island_Ship",
+            "FromFile": "assets\\Maps\\Exp_island_Ship.tmx"
+        }
+    ]
+}
