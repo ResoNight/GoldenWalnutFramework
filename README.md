@@ -25,7 +25,7 @@ This is a Framework Mod that lets you add custom Golden Walnuts and Parrot Upgra
         * [Custom](#custom)
       * [Location](#location)
       * [X and Y](#x-and-y)
-      * [Areas](#Areas)
+      * [Areas](#areas)
       * [Chance](#chance)
       * [Count](#count)
       * [DropAtOnce](#dropatonce)
@@ -41,21 +41,22 @@ This is a Framework Mod that lets you add custom Golden Walnuts and Parrot Upgra
   * [StickType](#sticktype)
   * [ParrotArea](#parrotarea)
   * [StoneAnimation](#stoneanimation)
-  * [DestroyAreas](#destroyAreas)
-  * [FromFile, FromArea, ToArea](#fromfile,-fromarea,-toarea)
+  * [DestroyAreas](#destroyareas)
+  * [FromFile, FromArea, ToArea](#fromfile-fromarea-toarea)
   * [Condition](#condition)
 * [Settings](#settings)
-  * [WalnutShops](#walnutshops) <- this one is important
   * [DisableWalnutCap](#disablewalnutcap)
   * [DisableSeasonalFeaturesForMaps](#disableseasonalfeaturesformaps)
+  * [SpentWalnuts](#spentwalnuts) <- this one is important
 * [Console Commands](#console-commands)
   * [ShowWalnuts](#showwalnuts)
-  * [RemoveWalnut](#removewalnut)
+  * [RemoveWalnut](#removewalnut-walnutid)
   * [ShowMailFlags](#showmailflags)
-  * [RemoveMailFlag](#removemailflag)
+  * [RemoveMailFlag](#removemailflag-mailflag)
   * [ShowAllWalnutIDs](#showallwalnutids)
-  * [ShowAllStoneTypeIDs](#showallstonetypeids)
-  * [/recountNuts](#recountNuts)
+  * [ShowStoneTypeIDs](#showstonetypeids)
+  * [/recountNuts](#recountnuts)
+  * [Other useful Commands](#other-useful-commands)
 * [GameStateQueries](#gamestatequeries)
 * [Example File](#example-file) 
 
@@ -89,7 +90,7 @@ and then you can write all your entries into that separate file.
 
 # General
 Now you can start writing stuff into the **Entries** field. There are a few things I want to mention before you jump into adding your new entries. The [Contents](#contents)
-field above roughly matches the structure that your entries will have. All entries will be checked when you start the game and they will be checked again, after you load into a save. The check for your [Location](#location) entries can only happen after loading into a save. If you are adding/changing entries in your content.json, you don't need to fully close the game and reopen it. You can just exit the save and re-enter it. You will get a little warning into your SMAPI console, when you add or remove a [Walnut Group](#hint), but don't worry, your collected Walnut Count will just be off for that session. After restarting, it will always be correct. Now lets get started with **GoldenWalnuts!**
+field above roughly matches the structure that your entries will have. All entries will be checked when you start the game and they will be checked again, after you load into a save. The check for your [Location](#location) entries can only happen after loading into a save. If you are adding/changing entries in your content.json, you don't need to fully close the game and reopen it. You can just exit the save and re-enter it. You will get a little warning into your SMAPI console, when you add or remove a [Walnut Group](#hint), but don't worry, your collected Walnut Count will just be off for that session and the hints might be off. Every single entry is case insensitive. Only what you enter as a value might be case sensitive. After restarting, it will always be correct. Now lets get started with **GoldenWalnuts!**
 
 # GoldenWalnuts
 The Basic structure for Golden Walnuts looks like this:
@@ -165,7 +166,7 @@ Field|Value|Description
 [Location](#location) | string | The Location of the Walnut
 [X](x-and-y) | int | The X-Coordinate of the Walnut
 [Y](x-and-y) | int | The Y-Coordinate of the Walnut
-[Areas](#Areas) | List with different elements (see at [Areas](#Areas)) | Areas in that the Walnut is obtainable
+[Areas](#areas) | List with different elements (see at [Areas](#areas)) | Areas in that the Walnut is obtainable
 [Chance](#chance) | float | The chance for the Walnut to drop. The number must be between 0 and 1.
 [Count](#count) | int | The amount of walnuts that can be dropped from this Walnut entry. (assigning a Count will change the [ID](#id))
 [DropAtOnce](#dropatonce) | int or string | The amount of walnuts that will be dropped at once. Cannot exceed the given [Count](#count)
@@ -203,7 +204,7 @@ Example:
 }
 ```
 
-A **Bush** must always have those fields and cannot have any other than that. On the Paths TileSheet when creating maps, there is a tile that lets you spawn in Walnut Bushes. ***DO NOT USE THIS!*** Adding a Walnut with Type Bush will spawn it in automatically. When you place them yourself, the Framework cannot keep track of them! What you can do though is place the tile with index 7 from the paths TileSheet on the Paths layer (see [Paths Layer](https://stardewvalleywiki.com/Modding:Maps#Paths_layer) on the Wiki). This is a tile that does not have any effect at all, so it is good for yourself to keep track, where you placed Bushes. Bushes do also support the [Conditions](#conditions) field, however, they cannot spawn in as soon as you meet those conditions, since checking every tick would be wayyy too much. Therefore, everytime you enter a location, the game will check for the Conditions of the Bushes in that area and therefore, the Bushes will spawn. You might want to keep that in mind, depending on how you use the Conditions field. Also, keep in mind that once a Bush has been spawned, it will not disappear, when the player doesn't meet the conditions anymore (So for example `TIME 600 900` will not make the Bush despawn after 9 am). One more thing, just like normal Bushes, spawning a Bush once would normally let it stay in the save file permanently. However, you don't have to worry about that. You will occasionally see a `x Bushes removed` in the console, since GWF automatically removes any Walnut Bushes that have been placed using the framework, but don't have any matching current entry.
+For Bushes, on the Paths TileSheet when creating maps, there is a tile that lets you spawn in Walnut Bushes. ***DO NOT USE THIS!*** Adding a Walnut with Type Bush will spawn it in automatically. When you place them yourself, the Framework cannot keep track of them! What you can do though is place the tile with index 7 from the paths TileSheet on the Paths layer (see [Paths Layer](https://stardewvalleywiki.com/Modding:Maps#Paths_layer) on the Wiki). This is a tile that does not have any effect at all, so it is good for yourself to keep track, where you placed Bushes. Bushes do also support the [Conditions](#conditions) field, however, they cannot spawn in as soon as you meet those conditions, since checking every tick would be wayyy too much. Therefore, everytime you enter a location, the game will check for the Conditions of the Bushes in that area and therefore, the Bushes will spawn. You might want to keep that in mind, depending on how you use the Conditions field. Also, keep in mind that once a Bush has been spawned, it will not disappear, when the player doesn't meet the conditions anymore (So for example `TIME 600 900` will not make the Bush despawn after 9 am). One more thing, just like normal Bushes, spawning a Bush once would normally let it stay in the save file permanently. However, you don't have to worry about that. You will occasionally see a `x Bushes removed` in the console, since GWF automatically removes any Walnut Bushes that have been placed using the framework, but don't have any matching current entry.
 
 ## Buried
 ![Buried in Town](docs/images/Example_Buried_Town.png)
@@ -261,7 +262,7 @@ Example:
 }
 ```
 
-For Fishing type Walnuts, you can either assign [X and Y](#x-and-y) for one specific tile or you can use the [Areas](#areas) field to assign a larger area. See below for more details on how to use the [Areas](#areas) field. If you use neither, the area will just be the whole map. If you assign a [Count](#count) and the last Walnut is being fished, the game will play a small soundeffect, so that the player knows, that he got all walnuts of one entry. The [DropAtOnce](#dropatonce) feature unfortunately does not work for **Fishing** type walnuts, since you are actively fishing one walnut instead of x walnuts being dropped into the world. For the [Chance](#chance), please keep in mind that the player is fishing pretty slowly and you can only fish one at a time. So whereas a 0.05 chance for a [Stone](#stone) type Walnut in a larger quarry would be perfectly reasonable, a 0.05 chance for fishing, especially if you assign a Count like 5, would be terrifyingly frustrating. So, in short, think of what you are doing and always think of the unlucky ones :) You can also assign Conditions (see below at [Conditions](#conditions)).
+For Fishing type Walnuts, you can either assign [X and Y](#x-and-y) for one specific tile or you can use the [Areas](#areas) field to assign a larger area. See below for more details on how to use the [Areas](#areas) field. If you use neither, the area will just be the whole map. If you assign a [Count](#count) and the last Walnut is being fished, the game will play a small soundeffect, so that the player knows, that he got all walnuts of one entry. The [DropAtOnce](#dropatonce) feature unfortunately does not work for **Fishing** type walnuts, since you are actively fishing one walnut instead of x walnuts being dropped into the world. For the [Chance](#chance), please keep in mind that the player is fishing pretty slowly and you can only fish one at a time. So whereas a 0.05 chance for a [Stone](#stone) type Walnut in a larger quarry would be perfectly reasonable, a 0.05 chance for fishing, especially if you assign a Count like 5, would be terrifyingly frustrating. So, in short, think of what you are doing and always think of the unlucky ones :) You can also assign [Conditions](#conditions).
 
 ## Stone
 ![Stone in MountainQuarry](docs/images/Example_Stone_Mountain.png)
@@ -346,7 +347,7 @@ Example:
 
 If you want to give the player Walnuts in any other way than the options from above, you can do this (This is C# territory). By adding a Custom Type walnut, you can synchronize your walnut with the whole walnut calculation and hint system. So, lets say, you add a fountain that gives you 5 Walnuts, if you throw a specific item in there. The whole item throwing in is your job. If you want to let a walnut drop on the ground, you can use something like this:
 ```Game1.createItemDebris(ItemRegistry.Create("(O)73"), new Vector2(Xf, Yf) * 64f, Game1.random.Next(4), null);```
-The item 73 is the golden Walnut. The vector is the pixels. One tile contains of 64*64 pixels from the mechanical perspective, so multiplying that vector by 64 gives you the Tile. This means, you can also let a Walnut drop at half a tile or pretty much wherever you want. Game1.random.Next(4) gives you a random number between 0 and 3, which are the 4 directions. So if you want the Walnut to be dropped to the top (like in the fountain image above), you would want to enter 0 (0 is up, 1 is right, 2 is down, 3 is left). the null is the location, which defaults to Game1.player.currentLocation. So normally null works fine, but if you let the walnut being dropped through the host for example, you might want to enter something else there. So this lets you drop in a Golden Walnut. When you don't want to drop it on the floor, you need to know that, when the game adds a Golden Walnut to your inventory, it instantly deletes it again and increases your Walnut Count by 1. So adding a Walnut to the Inventory in any way will increase the collected amount automatically. However, the Walnut itself does not contain any data like an ID whatsoever. Actually, the Walnut itself never has an ID or something, the game just drops a Walnut and *simultaneously* mark it as collected. So, theoretically, if you drop a walnut and somehow manage to not collect it (which is usually basically impossible), the game actually marks it as collected, even though you haven't collected the Walnut. So because of this, you can just drop the walnut like above and then you have to mark the Walnut as collected. To do this. lets take this entry as an example:
+The item 73 is the golden Walnut. So this lets you drop in a Golden Walnut. When you don't want to drop it on the floor, you need to know that, when the game adds a Golden Walnut to your inventory, it instantly deletes it again and increases your Walnut Count by 1. So adding a Walnut to the Inventory in any way will increase the collected amount automatically. However, the Walnut itself does not contain any data like an ID whatsoever. Actually, the Walnut itself never has an ID or something, the game just drops a Walnut and *simultaneously* mark it as collected. So, theoretically, if you drop a walnut and somehow manage to not collect it (which is usually basically impossible), the game actually marks it as collected, even though you haven't collected the Walnut. So because of this, you can just drop the walnut like above and then you have to mark the Walnut as collected. To do this. lets take this entry as an example:
 
 ```
 {
@@ -406,13 +407,13 @@ for (int i = 1; i <= 5; i++)
     }
 }
 ```
-As you can see, I really want to make sure that you do it the right way XD. If you ever need to look up the Walnuts that the player currently has, you can type [ShowWalnuts](#showwalnuts) into the SMAPI console and you get a list of them. The rest is on you. As long as you properly mark the Walnuts as collected in the **NutTracker** and you make sure that even in multiplayer, a walnut cannot accidentally be dropped multiple times (since you wouldn't get any warning or error of any kind for that), everything should be fine. Please also read [WalnutShops](#walnutshops) below. Now we are through with all the possible values for the [Type](#type) field. Now we can go on with the other fields.
+As you can see, I really want to make sure that you do it the right way XD. If you ever need to look up the Walnuts that the player currently has, you can type [ShowWalnuts](#showwalnuts) into the SMAPI console and you get a list of them. The rest is on you. As long as you properly mark the Walnuts as collected in the **NutTracker** and you make sure that even in multiplayer, a walnut cannot accidentally be dropped multiple times (since you wouldn't get any warning or error of any kind for that), everything should be fine. Please also read [SpentWalnuts](#spentwalnuts) below. Now we are through with all the possible values for the [Type](#type) field. Now we can go on with the other fields.
 
 ## Location
 For the location field, there are a few things to keep in mind. First, whenever you start the game, you can already see the error logs for your entries. But the location field can only be checked after you loaded into a save, since GWF needs to check for existing locations. For the location field, you need to add the name that the in-game location has, NOT the name of its file. So for example there is the file `Island_N`, but the location is named `IslandNorth` and you need to write *IslandNorth* into the locations field. If you don't know the name of a location, there are a few ways to find the name. First, you can go into the Data/Locations.json and actively look for the name in there. But this can be a bit annoying sometimes. So if you have the Mod FarmTypeManager installed, you can just go to the location and type `whereami` into the console and it will tell you the name of the location. Or probably the easiest way, you look at this [table](https://stardewvalleywiki.com/Modding:Location_data#Location_names) from the Wiki. Everything about the location entry is similar for the Locations field for [Golden Walnuts](#goldenwalnuts) and for [Parrot Upgrade Perches](#parrotupgradeperches).
 
 ## X and Y
-Those two fields are pretty self-explanatory. They assign one specific tile. For [Bushes](#bushes), this is the left tile of the Bush.
+Those two fields are pretty self-explanatory. They assign one specific tile. For [Bushes](#bush), this is the left tile of the Bush.
 
 ## Areas
 This field lets you add multiple areas in that a Walnut can be obtained. The entries of this field must look like this:
@@ -432,13 +433,13 @@ This field lets you add multiple areas in that a Walnut can be obtained. The ent
     ...
 ]
 ```
-For each {}, you can assign the [X and Y](x-and-y) coordinates and optionally also the [Width and Height](#width-and-height). If one of those or both are omitted, they just default to 1.
+For each {}, you can assign the X and Y coordinates and optionally also the Width and Height. If one of those or both are omitted, they just default to 1.
 
 ## Chance
 The chance is a number between 0 and 1. Genuinely think about what chance you can assign, it can quickly get frustrating, if someone is unlucky. And if many people play your mod, there *will* be unlucky people. For Fishing walnuts especially, you shouldn't make the chance too low, because you have to actively spent a ton of ingame time to get a chance one by one, whereas for monsters and stones, you can quickly go in, kill them once or destroy them once and then you got your chance for today, so fishing is generally much more frustrating than the other types.
 
 ## Count
-If you assign a Count to a Walnut, the ID gets changed a bit. Instead of one walnut having the [ID](#id) that you assigned (or that is automatically generated (see below at [AutomaticWalnutIDs](#automaticWalnutIDs)), each walnut gets its own individual ID, that is simply ID_1, ID_2, ID_3 and so on, up until your Count. The Count that you assign always determine the upper limit of how many walnuts you can get from this Walnut entry (So the field [DropAtOnce](#dropatonce) cannot exceed this limit)). For [Buried](#buried) Walnuts, all Walnuts will be dropped at once. For each other Walnut, you can get the Walnuts one at a time. If the player collects the last Walnut of a Walnut entry, the game will play a little soundeffect ("jingle1" if you are interested). Setting the Count to 1 is completely pointless, just don't. It will *NOT* change the ID to ID_1 in that case.
+If you assign a Count to a Walnut, the ID gets changed a bit. Instead of one walnut having the [ID](#id) that you assigned, each walnut gets its own individual ID, that is simply ID_1, ID_2, ID_3 and so on, up until your Count. The Count that you assign always determine the upper limit of how many walnuts you can get from this Walnut entry (So the field [DropAtOnce](#dropatonce) cannot exceed this limit)). For [Buried](#buried) Walnuts, all Walnuts will be dropped at once. For each other Walnut, you can get the Walnuts one at a time. If the player collects the last Walnut of a Walnut entry, the game will play a little soundeffect ("jingle1" if you are interested). Setting the Count to 1 is completely pointless, just don't. It will *NOT* change the ID to ID_1 in that case.
 
 ## DropAtOnce
 A valid entry for this field must look like this:
@@ -613,22 +614,22 @@ There is one very important thing with ParrotUpgradePerches. ***DO NOT*** softlo
 And all the possible entries are this:
 Field|Value|Description
 -----|-----|-----------
-[ID](#id-(pup)) | string | A unique ID for the PUP that also works as its MailFlag (see [ID (PUP)](#id-(pup))
-[Location](#location-(pup)) | string | The location of the Parrot
+[ID](#id-pup) | string | A unique ID for the PUP that also works as its MailFlag (see [ID (PUP)](#id-pup)
+[Location](#location-pup) | string | The location of the Parrot
 [Nuts](#nuts) | int | the required amount of Walnuts to activate the Parrot
-[ParrotTile](#parrottile) | {X: .., Y: ..} | The exact Tile of the Parrot (the tile refers to the bottom of the pole structure thingy)
+[ParrotTile](#parrottile) | {X: int, Y: int} | The exact Tile of the Parrot (the tile refers to the bottom of the pole structure thingy)
 [StickType](#sticktype) | string | if set, places the pole for the Parrot as well
 [ParrotArea](#parrotarea) | complex object | defines the area where the Parrots will start picking for the completion animation
 [StoneAnimation](#stoneanimation) | true/false | if set to true, changes the animation effects and sounds to a destroying stone kind of sound
 [DestroyAreas](#destroyareas) | complex object | defines the areas that will be destroyed upon completion
-[FromFile](#fromfile,-fromarea,-toarea) | string | The Mappath to the file from that you load the Map Override
-[FromArea](#fromfile,-fromarea,-toarea) | complex object | The area from the source map for the Map Override
-[ToArea](#fromfile,-fromarea,-toarea) | complex object | The target area where the Map will be overritten
+[FromFile](#fromfile-fromarea-toarea) | string | The Mappath to the file from that you load the Map Override
+[FromArea](C) | complex object | The area from the source map for the Map Override
+[ToArea](#fromfile-fromarea-toarea) | complex object | The target area where the Map will be overritten
 [Condition](#condition) | string | If set, lets the Parrot spawn after the Host received a set MailFlag (does NOT support a GameStateQuery)
 
 
 ## ID (PUP)
-The ID for a ParrotUpgradePerch must be unique and using the {{ModID}} token is strongly advised! So normally, a PUP gets spawned in once and stays in the save. But due to flexibility, the PUPs that come from this framework do **not** work like that. When you complete a ParrotUpgradePerch, its ID will be sent to the Host as a MailFlag and after restarting the game, the PUP will completely disappear from the save and will not be reinitialized if the Host has this MailFlag. That means two things. First, if you need to know if a PUP is completed or not, you should always just look if the Host has its ID as a MailFlag. If you want to look this up if the Host already has it, you can use the command [ShowMailFlags](#showmailflags) and see if you can find it. Sometimes when you want to test things, you might want to reset a PUP. You do this by using the command '[RemoveMailFlag](#removemailflag) flag' and for for flag, you enter the ID of the PUP.
+The ID for a ParrotUpgradePerch must be unique and using the {{ModID}} token is strongly advised! So normally, a PUP gets spawned in once and stays in the save. But due to flexibility, the PUPs that come from this framework do **not** work like that. When you complete a ParrotUpgradePerch, its ID will be sent to the Host as a MailFlag and after restarting the game, the PUP will completely disappear from the save and will not be reinitialized if the Host has this MailFlag. That means two things. First, if you need to know if a PUP is completed or not, you should always just look if the Host has its ID as a MailFlag. If you want to look this up if the Host already has it, you can use the command [ShowMailFlags](#showmailflags) and see if you can find it. Sometimes when you want to test things, you might want to reset a PUP. You do this by using the command [RemoveMailFlag](#removemailflag-mailflag).
 
 ## Location (PUP)
 The location entry is the same as the [location](#location) entry for Walnuts.
@@ -675,10 +676,10 @@ Example:
     "Height": 2
 }
 ```
-This defines the area where the Parrots start their picking animation. Often times, this area will be the same like your [DestroyArea](#destroyareas) or [ToArea](#toarea) field, but you can place it wherever you want. As of now, this animation is not the most dynamic one and the amount of flying Parrots is set. So if you have a huge area that you override or destroy, you might want to test a bit, where the area looks the best.
+This defines the area where the Parrots start their picking animation. Often times, this area will be the same like your [DestroyArea](#destroyareas) or [ToArea](#fromfile-fromarea-toarea) field, but you can place it wherever you want. As of now, this animation is not the most dynamic one and the amount of flying Parrots is set. So if you have a huge area that you override or destroy, you might want to test a bit, where the area looks the best.
 
 ## StoneAnimation
-If you set `"StoneAnimation": true`, an alternative animation will play. Normally, when you complete a ParrotUpgradePerch, you hear this wooden, building kind of sound and you see planks flying around. If you set this to true, you trigger an actually unused animation by the game in that you rather see stone particles and the sound when you hit something with a pickaxe, as well as an explosion sound at the end. So especially if you want to for example open up a way into a cave or something, this would be a good usage. (Very small side note, no one should ever need this, but I do alter the name of the PUP for that reason. So please never do anything with the actual name of a PUP, just use its ID/Its MailFlag. If you definitely need the name, you can ask me on the SV Discord server (name is @ResoNight), how the name thingy works).
+If you set `"StoneAnimation": true`, an alternative animation will play. Normally, when you complete a ParrotUpgradePerch, you hear this wooden, building kind of sound and you see planks flying around. If you set this to true, you trigger an actually unused animation by the game in that you rather see stone particles and the sound when you hit something with a pickaxe, as well as an explosion sound at the end. So especially if you want to for example open up a way into a cave or something, this would be a good usage. (Very small side note, no one should ever need this, but I do alter the name of the PUP for that reason. So please never do anything with the actual name of a PUP, just use its ID/Its MailFlag. If you definitely need the name, you can ask me on the SV Discord server, how the name thingy works).
 
 ## DestroyAreas
 Example:
@@ -698,7 +699,7 @@ Example:
 ]
 ```
 
-The areas you define here are areas that get destroyed after completing the PUP. The Width and Height are optional and will default to 1. You might want to use DestroyAreas field instead of the [Map Override](#fromfile,-fromarea,-toarea) fields more often than you think. For example lets say you want to open up an entry to a cave. You could first design the map with an opened entry, with the walls on the Buildings layer obviously. Then you could place a closed wall on the Buildings2 layer, so putting it above the entry. Then one more tile on the buildings layer to block the entry. Now you could make the Parrot destroy all the tiles on the Buildings2 layer as well as the one tile on the Buildings layer that blocked the entry. By doing that, you don't have to trigger a Map Override.
+The areas you define here are areas that get destroyed after completing the PUP. The Width and Height are optional and will default to 1. You might want to use DestroyAreas field instead of the [Map Override](#fromfile-fromarea-toarea) fields more often than you think. For example lets say you want to open up an entry to a cave. You could first design the map with an opened entry, with the walls on the Buildings layer obviously. Then you could place a closed wall on the Buildings2 layer, so putting it above the entry. Then one more tile on the buildings layer to block the entry. Now you could make the Parrot destroy all the tiles on the Buildings2 layer as well as the one tile on the Buildings layer that blocked the entry. By doing that, you don't have to trigger a Map Override.
 
 ## FromFile, FromArea, ToArea
 Example:
@@ -727,7 +728,7 @@ Those three fields are required to trigger a Map Override. First the **FromFile*
 And then, whatever you put in here as a target is what you also put into the **FromFile** field. The **FromArea** and **ToArea** field work exactly like any typical [EditMap](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/action-editmap.md) action that you also use for Map Overrides. However, as of now at least, it doesn't support the [PatchModes](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/action-editmap.md#overlay-a-map) that Content Patcher has and everything works like the default PatchMode. Also, obviously, the Width and Height of the **FromArea** and **ToArea** field must be identical.
 
 ## Condition
-Unlike the [Conditions](#conditions) field for Walnuts, this field does **NOT** support a GameStateQuery. ParrotUpgradePerches are pretty rigid structures and they can only have one single MailFlag as a condition. This means, if you need any kind of unique situation like an event for example, you should give a MailFlag to the *Host* (ALWAYS to the Host, everything works through the Host for this Framework) and this MailFlag is what you could put into this Condition field. Also this is useful to chain together PUPs, since you can just put the [ID](id-(pup)) of a PUP into the Condition field for another PUP (Remember, the ID of a PUP is also the MailFlag that it gives the player when completing the PUP).
+Unlike the [Conditions](#conditions) field for Walnuts, this field does **NOT** support a GameStateQuery. ParrotUpgradePerches are pretty rigid structures and they can only have one single MailFlag as a condition. This means, if you need any kind of unique situation like an event for example, you should give a MailFlag to the *Host* (ALWAYS to the Host, everything works through the Host for this Framework) and this MailFlag is what you could put into this Condition field. Also this is useful to chain together PUPs, since you can just put the [ID](id-pup) of a PUP into the Condition field for another PUP (Remember, the ID of a PUP is also the MailFlag that it gives the player when completing the PUP).
 
 # Settings
 The third big field (though arguably it got a lot smaller in the coding process), is the Settings field. This is a very simple list that should look like this:
@@ -749,13 +750,94 @@ Those are all the Settings that you can set.
 So normally, in the vanilla game, there is a hard-coded cap at 130 Walnuts. After having 130 Walnuts, giving the player any more than that will *not* increase the WalnutCounter. For this Framework, instead of completely disabling the Cap, I decided to move the Cap up to the new maximum of Walnuts. But for example, if you want to make Golden Walnuts an infinite resource, you can do this by disabling the Walnut Count. In that case, you also don't have to worry about any entries here at all, since I guess a broken Walnutcount is just part of it, when you make them infinitely obtainable. Keep in mind that this disables the cap for **all** mods that someone has simultaneously installed. You might also want to set this to true when testing stuff.
 
 ## DisableSeasonalFeaturesForMaps
-This Framework also provides seasonal variants of the WalnutBush and seasonal variants of Palmtrees. They will automatically apply whenever the current Location does *not* have the `LocationContext` property set to `Island` or `Desert`. If you don't want them to apply, you can enter the Maps in this field. So for example this: `"DisableSeasonalFeaturesForMaps": ["Town", "Mountain"]` would disable the seasonal WalnutBush for the town and the Mountain, so only their summer variant stays. This is mostly useful when you want to spawn WalnutBushes indoors.
+This Framework also provides seasonal variants of the WalnutBush and seasonal variants of Palmtrees. They will automatically apply whenever the current Location does *not* have the `LocationContext` property set to `Island` or `Desert`. If you don't want them to apply, you can enter the Maps in this field. So for example this: `"DisableSeasonalFeaturesForMaps": ["Town", "Mountain"]` would disable the seasonal walnut bush and palm trees for the town and the Mountain, so only their summer variant stays. This is mostly useful when you want to spawn WalnutBushes indoors. This also affects the Pole that the Parrot sticks on, when you assigned the [StickType](#sticktype).
 
-## WalnutShops
-This is a ***VERY*** important field, but mostly C# territory. Do not get confused by the name of this field, it took me wayyy too long to think of any reasonable name. This field lets you register custom ways of spending walnuts, so that the whole walnut calculation is still correct. An entry for this field would look for example like this:
+## SpentWalnuts
+This is mostly C# territory, but still a ***very*** important field. So as of now, the only way to spend walnuts is through a [ParrotUpgradePerch](#parrotupgradeperches). But of course, you can also add custom ways to spend walnuts. Whether it is a shop or for example throwing a Walnut into a fountain, practically anything that reduces the Walnutcounter. This field here lets you register your custom spent walnuts. Here is an example of such an entry:
 ```
-"WalnutShops": {
-    "{{ModID}}_GotFountainWalnuts": 1
+"SpentWalnuts": {
+    "{{ModID}}_GotFountainWalnuts": 3,
+    ...
 }
 ```
-So what this means. The first half in this case is the "{{ModID}}_GotFountainWalnuts". This is the MailFlag that you give the host after he spent the amount of walnuts that you assigned here on the right. So this example here is a literal example of my secondary Mod **Island Expansion**, that uses this Framework. When the player goes to a fountain there, he can right click and he gets the option to throw a Walnut into the fountain. As soon as he says yes, I give the host the MailFlag "ResoNight.IslandExpansion_GotFountainWalnuts"
+The thing on the left side is the MailFlag that you should give to the Host (MasterPlayer in C#) *after* any player spend x amount of walnuts somewhere. And the amount of walnuts that have been spent is the number on the right side. The MailFlag will also be added to Mr Qis shop as a condition before the Walnut Trade can appear. 
+
+> ### Qi Gem Shop
+> The Walnuttrade for the Qi Gem Shop works different than expected. The game does NOT work like, "you can spent 14 walnuts here". Instead, it checks if
+> you have completed every ParrotUpgradePerch and then you can spend *the rest* of your walnuts there. This means **1**, you MUST add every way to spend
+> walnuts into the SpentWalnuts field, so I can add them to the conditions for this trade (I already automatically add the MailFlags from the
+> ParrotUpgradePerches, and **2**, you don't have to worry about adding too many walnuts, since the player can simply sell the rest.
+
+So lets say you want to make the player throw 3 walnuts into a fountain to trigger something. The whole throwing in and creating the dialogue options are on your side. But here are some useful things. First, of course you have to check if the player even has that amount of walnuts. You can find this under `Game1.netWorldState.Value.GoldenWalnuts`. (The total found walnuts are `Game1.netWorldState.Value.GoldenWalnutsFound`, in case you ever need that). So in this example, you would do something like this:
+```
+if (Game1.netWorldState.Value.GoldenWalnuts >= 3) 
+{
+    Game1.netWorldState.Value.GoldenWalnuts-= 3;
+    //and here all the animation and stuff
+}
+```
+But we still need the MailFlag. So the very MailFlag, that you put into the WalnutShops field is what you give the Host, as soon as someone triggered this. This would look something like this:
+```
+
+if (Game1.MasterPlayer.mailReceived.Contains("ResoNight.IslandExpansion_GotFountainWalnuts")
+{
+    return;
+}
+if (Game1.netWorldState.Value.GoldenWalnuts >= 3)
+{
+    Game1.netWorldState.Value.GoldenWalnuts -= 3;
+    Game1.MasterPlayer.mailReveived.Add("ResoNight.IslandExpansion_GotFountainWalnuts");
+    //and here you trigger the rest that you want to do
+}
+```
+And with an entry like this, you add the field `"{{ModID}}_GotFountainWalnuts": 3` into the WalnutShops field like above. There are a couple more things that you should keep in mind. If, for example, you make an actual shop, and you make a onetime trade with 5 walnuts, you add the MailFlag and the number 5. But if you add a trade, where you can exchange 1 walnut 5 times, you need to actually create 5 different entries with 5 different MailFlags and the number 1 next to it. This is so rigid, because I need to accurately keep track of the actual current Walnutcount. If you make a trade infinite, you must also give the player infinite obtainable walnuts, since such a trade could easily softlock the player. With this in general, be careful to not softlock the player. One last thing, make sure to avoid that two players can trigger this at the same time, since this would break the Walnutcount.
+
+# Console Commands
+GoldenWalnutFramework also comes with a couple of useful console commands that you can type into the SMAPI console. All commands are case insensitive, so you can type for example showwalnuts instead of ShowWalnuts. I just wrote them like this for visibility. (The values behind the command **are** case sensitive though). You can also type `help` into the console for a small explanation.
+
+## ShowWalnuts
+This command shows you all the Walnuts, that the team currently has, including vanilla Walnuts. (It lists all walnuts that you can find in `Game1.player.team.collectedNutTracker`)
+
+## RemoveWalnut (WalnutID)
+If you want to unmark a walnut as collected, you can type `RemoveWalnut walnutID` into the console and for walnutID, the [ID](#id) of the walnut. You should use [/recountNuts](#recountnuts) after that to readjust the total walnut count. Make sure to save the day!
+
+## ShowMailFlags
+This lists you all the MailFlags that the Host (NOT the current player) has (They are at `Game1.MasterPlayer.mailReceived`). This is a shared field that all mods and the main game use, so this list can get quite long.
+
+## RemoveMailFlag (MailFlag)
+This practically lets you remove any MailFlag that the player has. This command exists so you can remove a MailFlag of a completed [ParrotUpgradePerch](#parrotupgradeperches) to practically reset it to be available again. If you use this command on any other MailFlag, I cannot guarantee for anything! You can use [/recountNuts](#recountnuts) after that to regain the spent walnuts and make sure to save the day!
+
+## ShowAllWalnutIDs
+This command lists all the added walnut IDs of all Mods that you have currently installed.
+
+## ShowStoneTypeIDs
+This is a pretty special command. If you are making a [Stone](#stone) type Walnut, you can also use the field [StoneTypes](#stonetypes). For this field, you need to enter the IDs of the right stones so that you let the right stones drop walnuts. There is no complete list on the wiki for every stone type and it can be quite annoying to find and connect every stone to its id, so by using this command, I just list you all the existing stones and some explanations on where they appear. So this is purely for convenience.
+
+## /recountNuts
+This is actually a vanilla command that you also do not type into the SMAPI console, but into the actual in-game chat. This command recalculates the amount of walnuts that you found in total and that you currently have. Especially for testing around, this is very useful. One thing about this command. This command actually does NOT count the amount of Walnuts that you spent at Mr Qi's Gem Shop. So if you use this command on a normal, completed account, even without any mods installed, you will actually regain 14 walnuts. So don't get confused if you suddenly have 14 walnuts. 
+
+## Other useful Commands
+There are a bunch of useful SMAPI Commands that will make your debugging life much easier. First, `debug item id count` with `debug item 73 10` gives you 10 Items of Item ID 73, which is the Golden Walnut. `debug warp location x y` warps you to a location instantly. But you don't have to enter the whole locationname. The game will just use the first location that it can find that contains your sequence of letters. So for example `debug warp ndn 14 15` would warp you on coordinates 14, 15 on islaNDNorth. If you have [Farm Type Manager](https://www.nexusmods.com/stardewvalley/mods/3231) installed, you can use the extremely useful command `whereami` to get the location and the X and Y coordinates, where you are standing on. If you use [Secret Note Framework](https://www.nexusmods.com/stardewvalley/mods/25055) and you want to quickly give you a note, you can use `list_items` and type `list items ichor`. This lists all the items that contain the letters "ichor", which is this item here: `(O)ichortower.SecretNoteFramework_DefaultNote` and by typing `debug item (O)ichortower.SecretNoteFramework_DefaultNote`, you can get this item, to test if your Secret Notes actually work. These are probably the most important ones. You should definitely have a look at the [Console Commands](https://stardewvalleywiki.com/Modding:Console_commands) page on the wiki and see what kinds of commands there are.
+
+# GameStateQueries
+This mod adds two new Game State Queries (see the [Game State Queries](https://stardewvalleywiki.com/Modding:Game_state_queries) page on the wiki) that you can use. The first one is:
+
+`COMPLETED_WALNUTGROUP groupkey`
+
+So when you add a WalnutGroup, it has a structure roughly like this:
+```
+"UniqueKey": {
+    "Hint": "...",
+    "Walnuts": [
+        ...
+    ]
+}
+```
+And the UniqueKey from this command is what you can put into the GameStateQuery for groupkey. This just returns true when the player has all walnuts of this group and false when he has not. The second GameStateQuery is this:
+
+`FOUND_EVERY_WALNUT`
+
+Before, you could use `WORLD_STATE_FIELD GoldenWalnutsFound 130` to check if the player has all, but since this Framework dynamically increases the maximum amount, you can use `FOUND_EVERY_WALNUT` to see if, well, the player found every walnut.
+
+# Example File
+Maybe it is easier for you to understand all the structure if you can see a complete json file. For that reason, I put an example json file into the GoldenWalnutFramework folder, so you can see for yourself, how everything looks like. This is the actually used file for my [Island Expansion](#) mod that also uses all of this Framework. I hope with all of this, you are now ready to add your own Custom Walnuts! :)
