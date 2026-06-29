@@ -763,7 +763,7 @@ So normally, in the vanilla game, there is a hard-coded cap at 130 Walnuts. Afte
 
 ## DisableSeasonalFeaturesForMaps
 
-
+![Seasonal Bushes](docs/images/Example_Seasonal_Bush.png)
 
 This Framework also provides seasonal variants of the WalnutBush and seasonal variants of Palmtrees. They will automatically apply whenever the current Location does *not* have the `LocationContext` property set to `Island` or `Desert`. If you don't want them to apply, you can enter the Maps in this field. So for example this: `"DisableSeasonalFeaturesForMaps": ["Town", "Mountain"]` would disable the seasonal walnut bush and palm trees for the town and the Mountain, so only their summer variant stays. This is mostly useful when you want to spawn WalnutBushes indoors. This also affects the Pole that the Parrot sticks on, when you assigned the [StickType](#sticktype).
 
