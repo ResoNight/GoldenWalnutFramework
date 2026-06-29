@@ -596,6 +596,9 @@ Then you can write this into the Conditions field (that is a custom GameStateQue
 This will effectively make the Walnut obtainable after any player has read the Secret Note. You could also write Current, All or Host instead of Any. One important thing is, while Walnuts have the Conditions field, the whole Walnutgroup and the [Hint](#hint) have the field [HintConditions](#hintconditions) as well. That field works exactly the same like the Conditions field for a single Walnut. But important to note is, every Walnut of the same group also have the conditions set in the [HintConditions](#hintconditions) field. Therefore, as long as the [Hint](#hint) itself is not available, none of its Walnuts are either.
 
 # ParrotUpgradePerches
+
+![Parrot Upgrade Perch](docs/images/Example_PUP.png)
+
 In case you don't know, a perch is also an english word for like a stick where a bird is sitting on. Lets just call it pole to avoid confusion. So a Parrot Upgrade Perch (in short PUP) refers to the Parrot that is sitting on such a stick with that you can trade walnuts in to change something on the map. The basic structure looks like this (note the [] and {} brackets):
 
 ```
@@ -648,6 +651,9 @@ You type in the ParrotTile like this:
 The tile that you are defining is the bottom part of the pole. So the Parrot itself sits one tile higher than that. You will see when testing.
 
 ## StickType
+
+![Parrot Upgrade Perch Fall image](docs/images/Example_PUP_Plant_Fall.png)
+
 You can add the field `"StickType": "Wood/Plant"` with either Wood or Plant as the value. If you don't use this field, it will just spawn in the Parrot, but if you do use it, it will place the pole as well. The plant type is the mostly used one and the wood type is like the one in the volcano. If you use this, you will also get seasonal variants of the Poles (mostly for the plant type). They will automatically apply, if your map does *not* have the Property LocationContext set to Island or Desert (see the [Maps](https://stardewvalleywiki.com/Modding:Maps#Other_location_metadata) page on the Wiki). However, if you want to use your own custom seasonal sheets,  you can either just not set StickType and place your own pole, or you can also edit the image files that I use for the Poles. To edit the non-seasonal one, write this:
 ```
 {
@@ -667,6 +673,9 @@ for the seasonal versions, you can either edit the file of one specific season o
 This replaces the spring_ParrotSticks file with your spring_ParrotSticks.png when it is spring, the summer_ParrotSticks file with your summer_ParrotSticks.png when it is summer and so on. Or you can just write one specific season. The target file is just a tiny 32*32 pixel image, so no need to use `EditImage`, just replace it. To find what the files look like, you can go into the GoldenWalnutFramework folder and open the assets and then ParrotSticks folder.
 
 ## ParrotArea
+
+![Parrot Upgrade Perch Wood Animation](docs/images/Example_PUP_Wood.png)
+
 Example:
 ```
 "ParrotArea": {
@@ -679,6 +688,9 @@ Example:
 This defines the area where the Parrots start their picking animation. Often times, this area will be the same like your [DestroyArea](#destroyareas) or [ToArea](#fromfile-fromarea-toarea) field, but you can place it wherever you want. As of now, this animation is not the most dynamic one and the amount of flying Parrots is set. So if you have a huge area that you override or destroy, you might want to test a bit, where the area looks the best.
 
 ## StoneAnimation
+
+![Parrot Upgrade Perch Stone Animation](docs/images/Example_PUP_Stone.png)
+
 If you set `"StoneAnimation": true`, an alternative animation will play. Normally, when you complete a ParrotUpgradePerch, you hear this wooden, building kind of sound and you see planks flying around. If you set this to true, you trigger an actually unused animation by the game in that you rather see stone particles and the sound when you hit something with a pickaxe, as well as an explosion sound at the end. So especially if you want to for example open up a way into a cave or something, this would be a good usage. (Very small side note, no one should ever need this, but I do alter the name of the PUP for that reason. So please never do anything with the actual name of a PUP, just use its ID/Its MailFlag. If you definitely need the name, you can ask me on the SV Discord server, how the name thingy works).
 
 ## DestroyAreas
@@ -750,6 +762,9 @@ Those are all the Settings that you can set.
 So normally, in the vanilla game, there is a hard-coded cap at 130 Walnuts. After having 130 Walnuts, giving the player any more than that will *not* increase the WalnutCounter. For this Framework, instead of completely disabling the Cap, I decided to move the Cap up to the new maximum of Walnuts. But for example, if you want to make Golden Walnuts an infinite resource, you can do this by disabling the Walnut Count. In that case, you also don't have to worry about any entries here at all, since I guess a broken Walnutcount is just part of it, when you make them infinitely obtainable. Keep in mind that this disables the cap for **all** mods that someone has simultaneously installed. You might also want to set this to true when testing stuff.
 
 ## DisableSeasonalFeaturesForMaps
+
+
+
 This Framework also provides seasonal variants of the WalnutBush and seasonal variants of Palmtrees. They will automatically apply whenever the current Location does *not* have the `LocationContext` property set to `Island` or `Desert`. If you don't want them to apply, you can enter the Maps in this field. So for example this: `"DisableSeasonalFeaturesForMaps": ["Town", "Mountain"]` would disable the seasonal walnut bush and palm trees for the town and the Mountain, so only their summer variant stays. This is mostly useful when you want to spawn WalnutBushes indoors. This also affects the Pole that the Parrot sticks on, when you assigned the [StickType](#sticktype).
 
 ## SpentWalnuts
