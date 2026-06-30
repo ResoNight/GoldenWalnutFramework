@@ -92,7 +92,7 @@ and then you can write all your entries into that separate file.
 
 # General
 Now you can start writing stuff into the **Entries** field. There are a few things I want to mention before you jump into adding your new entries. The [Contents](#contents)
-field above roughly matches the structure that your entries will have. All entries will be checked when you start the game and they will be checked again, after you load into a save. The check for your [Location](#location) entries can only happen after loading into a save. If you are adding/changing entries in your content.json, you don't need to fully close the game and reopen it. You can just exit the save and re-enter it. You will get a little warning into your SMAPI console, when you add or remove a [Walnut Group](#hint), but don't worry, your collected Walnut Count will just be off for that session and the hints might be off. Every single entry is case insensitive. Only what you enter as a value might be case sensitive. After restarting, it will always be correct. Now lets get started with **GoldenWalnuts!**
+field above roughly matches the structure that your entries will have. Most entries will be checked as soon as you start the game, but the check for the [Location](#location) fields can only happen *after* loading into a save. Every single entry is case insensitive. Only what you enter as a value might be case sensitive. Now lets get started with **GoldenWalnuts!**
 
 # GoldenWalnuts
 The Basic structure for Golden Walnuts looks like this:
