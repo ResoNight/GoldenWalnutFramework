@@ -606,7 +606,29 @@ In case you don't know, a perch is also an english word for like a stick where a
 ```
 "ParrotUpgradePerches": [
     {
-        //entries for first Parrot
+        "ID": "{{ModID}}_Town_Parrot_Center,
+        "Location": "Town",
+        "Nuts": 5,
+        "ParrotTile": {
+            "X": 63,
+            "Y": 46,
+        }
+        "StickType": "Plant",
+        "ParrotArea": {
+            "X": 64,
+            "Y": 49,
+            "Width": 2,
+            "Height": 4
+        },
+        "StoneAnimation": true,
+        "DestroyAreas: [
+            {
+                "X": 64,
+                "Y": 49,
+                "Width": 2,
+                "Height": 4
+            }
+        ]
     },
     {
         //entries for second Parrot
