@@ -100,7 +100,7 @@ The Basic structure for Golden Walnuts looks like this:
 "GoldenWalnuts": {
     "UniqueKey1": {
         "Hint": "...",
-        "Singular": "...",
+        "Singular": "...", //optional
         "SeparateHint": true/false, //optional
         "ShowThisHint": true/false, //optional
         "HintConditions": "AnyGameStateQuery" //optional
