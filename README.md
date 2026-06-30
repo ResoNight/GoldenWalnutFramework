@@ -1,4 +1,4 @@
-# Golden Walnut Framework (GWF)
+# Golden Walnut Framework (GWF) Author Guide
 
 ![Bush Ring image](docs/images/Bush_Ring.png)
 
