@@ -433,7 +433,6 @@ namespace GoldenWalnutFramework
 
         private void FirstCheck()
         {
-            Helper.GameContent.InvalidateCache("Mods/GoldenWalnutFramework/Data");
             var json = Game1.content.Load<BaseJSON>("Mods/GoldenWalnutFramework/Data");
             mf!.RegisterJSONSettings(json.Settings);
             foreach (var perch in json.ParrotUpgradePerches)
@@ -498,7 +497,6 @@ namespace GoldenWalnutFramework
             customHintForToday = null;
 
             int walnutGroupCount = 0;
-            Helper.GameContent.InvalidateCache("Mods/GoldenWalnutFramework/Data");
             var json = Game1.content.Load<BaseJSON>("Mods/GoldenWalnutFramework/Data");
 
             mf!.RegisterJSONSettings(json.Settings);
@@ -695,10 +693,10 @@ namespace GoldenWalnutFramework
                     Monitor.Log($"If you are a player, ignore this. You added the location {location} in the disableSeasonalFeaturesForMaps that is not an existing location!", LogLevel.Warn);
                 }
             }
-            if (walnutGroupCount != walnutGroupCountForTranspiler)
-            {
-                Monitor.Log("It seems like you changed the amount of Walnutgroups while the game is loaded. This means that the in-Game command '/recountNuts' will be wrong and the hints at the Parrot in the Islandhut won't be correct. This will be fixed after restarting the game", LogLevel.Warn);
-            }
+            //if (walnutGroupCount != walnutGroupCountForTranspiler)
+            //{
+            //    Monitor.Log("It seems like you changed the amount of Walnutgroups while the game is loaded. This means that the in-Game command '/recountNuts' will be wrong and the hints at the Parrot in the Islandhut won't be correct. This will be fixed after restarting the game", LogLevel.Warn);
+            //}
         }
 
         private void CalculateCap()
