@@ -798,6 +798,7 @@ namespace GoldenWalnutFramework
                 if (!Game1.player.team.collectedNutTracker.Contains(id))
                 {
                     gaveAtLeastOne = true;
+                    Game1.netWorldState.Value.GoldenWalnuts++;
                     Game1.player.team.collectedNutTracker.Add(id);
                 }
             }
@@ -1435,8 +1436,15 @@ namespace GoldenWalnutFramework
                     }
                     else
                     {
-                        m.Monitor.Log("You placed a bush where a vanilla Bush already exists.", LogLevel.Error);
-                        m.unobtainableWalnuts.Add(walnut.ID!);
+                        foreach (var vanillaBush in m.vanillaBushes)
+                        {
+                            if (vanillaBush.Key == bush.Location.Name && vanillaBush.Value == bush.Tile)
+                            {
+                                m.Monitor.Log("You placed a bush where a vanilla Bush already exists.", LogLevel.Error);
+                                m.unobtainableWalnuts.Add(walnut.ID!);
+                                break;
+                            }
+                        }
                     }
                     return;
                 }
