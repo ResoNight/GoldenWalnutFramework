@@ -804,7 +804,7 @@ namespace GoldenWalnutFramework
             }
             if (gaveAtLeastOne)
             {
-                Game1.addHUDMessage(new HUDMessage("You have received all the Golden Walnuts that became unobtainable, due to multiple mods adding a Walnut Bush at the same coordinates."));
+                Game1.addHUDMessage(new HUDMessage("You have received all the Golden Walnuts that became unobtainable, due to multiple mods adding a Walnut Bush at the same coordinates.", 3, true));
             }
         }
 
