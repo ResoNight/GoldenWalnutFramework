@@ -559,7 +559,8 @@ namespace GoldenWalnutFramework
                     }
                     if (MainPatches.CustomWalnuts.Any(storedWalnut => storedWalnut.ID == walnut.ID))
                     {
-                        Monitor.Log($"Multiple walnuts with this ID: '{walnut.ID}' have been detected. If you are a player, you can give yourself a walnut for each time that you see this error to compensate for the missing walnuts. To do this, type into the SMAPI Console 'debug item 73 x' and for x the amount of times you get this error. If you are a modder, DO NOT add the same ID twice. If you didn't do that, another mod that you have currently installed also used the same ID. Please just use another ID in that case. (Are you using the {{ModID}} token)?", LogLevel.Error);
+                        Monitor.Log($"There are multiple Walnuts with ID: {walnut.ID}", LogLevel.Error);
+                        unobtainableWalnuts.Add(walnut.ID!);
                         continue;
                     }
                     if (group.Value.HintConditions != null)
@@ -797,14 +798,22 @@ namespace GoldenWalnutFramework
             {
                 if (!Game1.player.team.collectedNutTracker.Contains(id))
                 {
+                    if (!gaveAtLeastOne)
+                    {
+                        Monitor.Log("This is a list of all unobtainable Walnuts", LogLevel.Warn);
+                        Monitor.Log("------------------------------------------------------------", LogLevel.Warn);
+                    }
                     gaveAtLeastOne = true;
                     Game1.netWorldState.Value.GoldenWalnuts++;
                     Game1.player.team.collectedNutTracker.Add(id);
+                    Monitor.Log(id, LogLevel.Warn);
                 }
             }
             if (gaveAtLeastOne)
             {
-                Game1.addHUDMessage(new HUDMessage("You have received all the Golden Walnuts that became unobtainable, due to multiple mods adding a Walnut Bush at the same coordinates.", 3, true));
+                Monitor.Log("------------------------------------------------------------", LogLevel.Warn);
+                Game1.addHUDMessage(new HUDMessage("You have received all the Golden Walnuts that are unobtainable. Check the Console", 3));
+                Monitor.Log("If you are a player, you can ignore this. If you are a modder, you added two Walnut Bushes at the same coordinates. If you see a double ID error above, you have two walnuts with the same ID. If you have another mod installed that also uses this Framework, you might share the same ID or Bush with that mod. Please make sure to use the ModID token for the ID and for the Bush, you can simply ignore this. Multiple mods adding the same Bush can happen and no mod should 'own' a Bush position.", LogLevel.Warn);
             }
         }
 
