@@ -1,7 +1,7 @@
 ﻿{
         "Name": "Golden Walnut Framework",
         "Author": "ResoNight",
-        "Version": "1.0.0",
+        "Version": "1.0.1",
         "Description": "adds a Framework for modders to add more Golden Walnuts and Parrot Upgrade Perches",
         "UniqueID": "ResoNight.GoldenWalnutFramework",
         "EntryDll": "GoldenWalnutFramework.dll",

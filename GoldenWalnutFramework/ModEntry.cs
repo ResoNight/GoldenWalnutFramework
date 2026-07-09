@@ -469,10 +469,10 @@ namespace GoldenWalnutFramework
             Helper.GameContent.InvalidateCache("TileSheets/bushes");
             Helper.GameContent.InvalidateCache("TerrainFeatures/tree_palm");
 
+            RemoveBushes();
             FillMainLists();
             CalculateCap();
             AddQiShopConditions();
-            RemoveOldBushes();
             CheckForInvalidPlacedBushes();
             GiveUnobtainableWalnuts();
         }
@@ -733,40 +733,16 @@ namespace GoldenWalnutFramework
             }
         }
 
-        public void RemoveOldBushes()
+        public void RemoveBushes()
         {
-            int deletedCount = 0;
-            HashSet<string> customBushes = [];
-            foreach (var walnut in MainPatches.CustomWalnuts)
-            {
-                if (walnut.Type!.Equals("Bush", StringComparison.OrdinalIgnoreCase))
-                {
-                    customBushes.Add(walnut.ID!);
-                }
-            }
             foreach (GameLocation l in Game1.locations)
             {
                 for (int i = l.largeTerrainFeatures.Count - 1; i >= 0; i--)
                 {
                     if (l.largeTerrainFeatures[i] is Bush bush && bush.size.Value == 4 && bush.modData.TryGetValue("ResoNight.GoldenWalnutFramework/CustomID", out var customID))
                     {
-                        if (!customBushes.Contains(customID))
-                        {
-                            l.largeTerrainFeatures.RemoveAt(i);
-                            deletedCount++;
-                        }
+                        l.largeTerrainFeatures.Remove(bush);
                     }
-                }
-            }
-            if (deletedCount > 0)
-            {
-                if (deletedCount == 1)
-                {
-                    Monitor.Log("Removed 1 bush", LogLevel.Info);
-                }
-                else
-                {
-                    Monitor.Log($"Removed {deletedCount} bushes", LogLevel.Info);
                 }
             }
         }
