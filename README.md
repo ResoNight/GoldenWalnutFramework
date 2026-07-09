@@ -93,7 +93,7 @@ and then you can write all your entries into that separate file.
 
 # General
 Now you can start writing stuff into the **Entries** field. There are a few things I want to mention before you jump into adding your new entries. The [Contents](#contents)
-field above roughly matches the structure that your entries will have. Most entries will be checked as soon as you start the game, but the check for the [Location](#location) fields can only happen *after* loading into a save. Every single entry is case insensitive. Only what you enter as a value might be case sensitive. Now lets get started with **GoldenWalnuts!**
+field above roughly matches the structure that your entries will have. Most entries will be checked as soon as you start the game, but the check for the [Location](#location) fields can only happen *after* loading into a save. Every single entry is case insensitive. Only what you enter as a value might be case sensitive. We are at the very beginning of this Framework, if you need help or you have questions, just message me directly on discord. I am very happy to help people get into this framework. You can find me in the SV discord server, name ResoNight. Now lets get started with **GoldenWalnuts!**
 
 # GoldenWalnuts
 The Basic structure for Golden Walnuts looks like this:
