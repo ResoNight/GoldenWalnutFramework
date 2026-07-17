@@ -1,29 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Reflection.Metadata.Ecma335;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Netcode;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
 using StardewValley.Delegates;
 using StardewValley.Events;
-using StardewValley.Extensions;
-using StardewValley.GameData.Buildings;
-using StardewValley.GameData.Objects;
 using StardewValley.GameData.Shops;
 using StardewValley.Locations;
 using StardewValley.Menus;
-using StardewValley.Monsters;
+using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
 using xTile;
 using xTile.Dimensions;
 using xTile.Tiles;
+using static GoldenWalnutFramework.RemainingNutsToken;
 
 namespace GoldenWalnutFramework
 {
@@ -35,20 +36,25 @@ namespace GoldenWalnutFramework
         public string? customHintForToday = null;
         public int additionalGoldenWalnuts = 0;
         public int GoldenWalnutCap = IslandLocation.TOTAL_WALNUTS;
-        public int SpentWalnutsForPUPs = 0;
         public int walnutGroupCountForTranspiler = 0;
         public int vanillaWalnutCount = 0;
+        public int currentWalnutCountForShops = 0;
+        public int walnutDebt = 0;
         public bool disableWalnutCap = false;
         public bool dayIsResetting = true;
         public bool playJingle = false;
+        public bool triggeredBridgeOverlayAboveMoneybags = false;
         public bool? seasonalTerrainFeatures = null;
         public HashSet<string> excludedMapsFromSeasonalFeatures = new(StringComparer.OrdinalIgnoreCase);
-        public List<ParrotUpgradePerch> Custom_parrotUpgradePerches = [];
+        //public List<ParrotUpgradePerch> Custom_parrotUpgradePerches = [];
         public List<KeyValuePair<string, Vector2>> vanillaBushes = [];
         public HashSet<string> unobtainableWalnuts = [];
         public Dictionary<string, string[]> GameStateQueryWalnutGroups = [];
+        public Dictionary<GameLocation, NetList<ParrotUpgradePerch, NetRef<ParrotUpgradePerch>>> CustomPUPLists = new();
 
-        public List<string> vanillaWalnutIDs = [
+        
+
+        public HashSet<string> vanillaWalnutIDs = [
             "Bush_IslandNorth_13_33", "Bush_IslandNorth_5_30", "Buried_IslandNorth_19_39", "Bush_IslandNorth_4_42", "Bush_IslandNorth_45_38", "Bush_IslandNorth_47_40", "IslandLeftPlantRestored", "IslandRightPlantRestored", "IslandBatRestored", "IslandFrogRestored",
             "IslandCenterSkeletonRestored", "IslandSnakeRestored", "Buried_IslandNorth_19_13", "Buried_IslandNorth_57_79", "Buried_IslandNorth_54_21", "Buried_IslandNorth_42_77", "Buried_IslandNorth_62_54", "Buried_IslandNorth_26_81", "Bush_IslandNorth_20_26", "Bush_IslandNorth_9_84",
             "Bush_IslandNorth_56_27", "Bush_IslandSouth_31_5", "TreeNut", "IslandWestCavePuzzle", "SandDuggy", "TigerSlimeNut", "Buried_IslandWest_21_81", "Buried_IslandWest_62_76", "Buried_IslandWest_39_24", "Buried_IslandWest_88_14",
@@ -56,27 +62,28 @@ namespace GoldenWalnutFramework
             "Bush_IslandWest_25_30", "Bush_IslandWest_15_3", "IslandFishing", "VolcanoNormalChest", "VolcanoRareChest", "VolcanoBarrel", "VolcanoMining", "VolcanoMonsterLoot", "Island_N_BuriedTreasureNut", "Island_W_BuriedTreasureNut",
             "Island_W_BuriedTreasureNut2", "Mermaid", "TreeNutShot", "Buried_IslandSouthEastCave_36_26", "Buried_IslandSouthEast_25_17", "StardropPool", "Bush_Caldera_28_36", "Bush_Caldera_9_34", "Bush_CaptainRoom_2_4", "BananaShrine",
             "Bush_IslandEast_17_37", "Darts", "IslandGourmand1", "IslandGourmand2", "IslandGourmand3", "IslandShrinePuzzle", "Bush_IslandShrine_23_34"
-        ]; //unused. Just to look things up
+        ];
 
         public HashSet<string> vanillaBushIDs = new(StringComparer.OrdinalIgnoreCase)
         {
             "Bush_IslandNorth_13_33", "Bush_IslandNorth_5_30", "Bush_IslandNorth_4_42", "Bush_IslandNorth_45_38", "Bush_IslandNorth_47_40", "Bush_IslandNorth_20_26", "Bush_IslandNorth_9_84",
             "Bush_IslandNorth_56_27", "Bush_IslandSouth_31_5", "Bush_IslandWest_104_3", "Bush_IslandWest_31_24", "Bush_IslandWest_38_56", "Bush_IslandWest_75_29", "Bush_IslandWest_64_30", "Bush_IslandWest_54_18",
             "Bush_IslandWest_25_30", "Bush_IslandWest_15_3", "Bush_Caldera_28_36", "Bush_Caldera_9_34", "Bush_CaptainRoom_2_4", "Bush_IslandEast_17_37", "Bush_IslandShrine_23_34"
-        }; //used. Not just to look things up
-
-
+        };
 
         public override void Entry(IModHelper helper)
         {
             Instance = this;
             mf = new();
             cmds = new();
+
+            helper.Events.GameLoop.GameLaunched += GameLoop_GameLaunched;
             helper.Events.GameLoop.UpdateTicked += GameLoop_UpdateTicked;
             helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
             helper.Events.GameLoop.DayStarted += GameLoop_DayStarted;
             helper.Events.GameLoop.DayEnding += GameLoop_DayEnding;
             helper.Events.World.TerrainFeatureListChanged += World_TerrainFeatureListChanged;
+            helper.Events.Display.RenderedWorld += Display_RenderedWorld;
             helper.Events.World.ObjectListChanged += World_ObjectListChanged;
             helper.Events.World.NpcListChanged += World_NpcListChanged;
             helper.Events.Player.Warped += Player_Warped;
@@ -88,6 +95,7 @@ namespace GoldenWalnutFramework
             helper.ConsoleCommands.Add("ShowStoneTypeIDs", "Lists the IDs for all the Stone Nodes in the game", cmds.ShowStoneTypeIDs);
             helper.ConsoleCommands.Add("RemoveMailFlag", "Lets you remove a Mailflag. Mainly used for resetting ParrotUpgradePerches. Remember to save the day!", cmds.RemoveMailFlag);
             helper.ConsoleCommands.Add("RemoveWalnut", "Lets you remove a walnut, setting it back to it can be collected again. Remember to save the day!", cmds.RemoveWalnut);
+            helper.ConsoleCommands.Add("ResetQiShopWalnuts", "This will reset the internal counter for spent walnuts at Mr Qi's Gem Shop back to zero. (Walnuts get recalculated after that)", cmds.ResetQiShopWalnuts);
 
             GameStateQuery.Register("COMPLETED_WALNUTGROUP", cmds.WalnutGroupGSQ);
             GameStateQuery.Register("FOUND_EVERY_WALNUT", cmds.WalnutCountGSQ);
@@ -97,8 +105,6 @@ namespace GoldenWalnutFramework
                 string[] splitString = vanillaBush.Split('_');
                 vanillaBushes.Add(new KeyValuePair<string, Vector2>(splitString[1], new Vector2(int.Parse(splitString[2]), int.Parse(splitString[3]))));
             }
-            
-
 
 
             new Harmony(ModManifest.UniqueID).Patch(
@@ -117,9 +123,9 @@ namespace GoldenWalnutFramework
                     typeof(Game1),
                     "RecountWalnuts"
                 ),
-                postfix: new HarmonyMethod(
+                prefix: new HarmonyMethod(
                     typeof(MainPatches),
-                    nameof(MainPatches.RecountWalnuts_Postfix)
+                    nameof(MainPatches.RecountWalnuts_Prefix)
                 )
             );
 
@@ -184,7 +190,7 @@ namespace GoldenWalnutFramework
                 ),
                 postfix: new HarmonyMethod(
                     typeof(MainPatches),
-                    nameof(MainPatches.IslandNorthGoldenParrot_Postfix)
+                    nameof(MainPatches.IslandNorthItself_Postfix)
                 )
             );
 
@@ -284,6 +290,54 @@ namespace GoldenWalnutFramework
                 postfix: new HarmonyMethod(
                     typeof(MainPatches),
                     nameof(MainPatches.loadMap_Postfix)
+                )
+            );
+
+            new Harmony(ModManifest.UniqueID).Patch(
+                original: AccessTools.Method(
+                    typeof(SandDuggy),
+                    "OnWhackedChanged"
+                ),
+                prefix: new HarmonyMethod(
+                    typeof(MainPatches),
+                    nameof(MainPatches.SandDuggyOnWhackedChangedHarmony_Prefix)
+                )
+            );
+
+            new Harmony(ModManifest.UniqueID).Patch(
+                original: AccessTools.Method(
+                    typeof(ShopMenu),
+                    "ConsumeTradeItem"
+                ),
+                prefix: new HarmonyMethod(
+                    typeof(MainPatches),
+                    nameof(MainPatches.ShopMenuConsumeTradeItemHarmony_Prefix)
+                )
+            );
+
+            new Harmony(ModManifest.UniqueID).Patch(
+                original: AccessTools.Method(
+                    typeof(Bush),
+                    "shake"
+                ),
+                prefix: new HarmonyMethod(
+                    typeof(MainPatches),
+                    nameof(MainPatches.BushShake_Prefix)
+                ),
+                postfix: new HarmonyMethod(
+                    typeof(MainPatches),
+                    nameof(MainPatches.BushShake_Postfix)
+                )
+            );
+
+            new Harmony(ModManifest.UniqueID).Patch(
+                original: AccessTools.Method(
+                    typeof(GameLocation),
+                    "initNetFields"
+                ),
+                postfix: new HarmonyMethod(
+                    typeof(BasePatches),
+                    nameof(BasePatches.GameLocationInitNetFieldsHarmony_Postfix)
                 )
             );
 
@@ -396,22 +450,37 @@ namespace GoldenWalnutFramework
                     nameof(BasePatches.GameLocationDrawAboveAlwaysFrontLayerHarmony_Postfix)
                 )
             );
-
-            new Harmony(ModManifest.UniqueID).Patch(
-                original: AccessTools.Method(
-                    typeof(Bush),
-                    "shake"
-                ),
-                prefix: new HarmonyMethod(
-                    typeof(BasePatches),
-                    nameof(BasePatches.BushShake_Prefix)
-                ),
-                postfix: new HarmonyMethod(
-                    typeof(BasePatches),
-                    nameof(BasePatches.BushShake_Postfix)
-                )
-            );
         }
+
+        private void GameLoop_GameLaunched(object? sender, GameLaunchedEventArgs e)
+        {
+            var api = Helper.ModRegistry.GetApi<ContentPatcher.IContentPatcherAPI>("Pathoschild.ContentPatcher");
+            if (api == null)
+            {
+                Monitor.Log("Content Patcher's API couldn't be loaded", LogLevel.Error);
+                return;
+            }
+            api.RegisterToken(ModManifest, "RemainingWalnutsInGroup", new RemainingNutsToken());
+        }
+
+        private void Display_RenderedWorld(object? sender, RenderedWorldEventArgs e)
+        {
+            if (triggeredBridgeOverlayAboveMoneybags) { return; }
+            if (Game1.farmEvent is WorldChangeEvent goldenParrotevent &&  goldenParrotevent.whichEvent.Value == 15)
+            {
+                triggeredBridgeOverlayAboveMoneybags = true;
+                Game1.getLocationFromName("IslandNorth").temporarySprites.Add(new TemporaryAnimatedSprite("LooseSprites\\SuspensionBridge", new Microsoft.Xna.Framework.Rectangle(0, 0, 96, 48), new Vector2(38f * 64f, 37f * 64f), false, 0f, Color.White)
+                {
+                    animationLength = 1,
+                    interval = 700f,
+                    totalNumberOfLoops = 999,
+                    layerDepth = 1f,
+                    scale = 4f
+                });
+            }
+            
+        }
+
         private bool launchedFirstCheck;
         private void GameLoop_UpdateTicked(object? sender, UpdateTickedEventArgs e)
         {
@@ -433,13 +502,15 @@ namespace GoldenWalnutFramework
 
         private void FirstCheck()
         {
-            var json = Game1.content.Load<BaseJSON>("Mods/GoldenWalnutFramework/Data");
-            mf!.RegisterJSONSettings(json.Settings);
-            foreach (var perch in json.ParrotUpgradePerches)
+            JSONData.LoadFiles();
+
+
+            mf!.RegisterJSONSettings(JSONData.Settings);
+            foreach (var perch in JSONData.ParrotUpgradePerches)
             {
                 mf!.CheckJSONPerches(perch);
             }
-            foreach (var group in json.GoldenWalnuts)
+            foreach (var group in JSONData.GoldenWalnuts)
             {
                 if (string.IsNullOrWhiteSpace(group.Value.Hint))
                 {
@@ -465,16 +536,76 @@ namespace GoldenWalnutFramework
         private void GameLoop_SaveLoaded(object? sender, SaveLoadedEventArgs e)
         {
             Game1.MasterPlayer.mailReceived.OnValueAdded += mf!.MailReceived_OnValueAdded;
-
             Helper.GameContent.InvalidateCache("TileSheets/bushes");
             Helper.GameContent.InvalidateCache("TerrainFeatures/tree_palm");
 
+            CheckForFirstLaunch();
             RemoveBushes();
             FillMainLists();
             CalculateCap();
             AddQiShopConditions();
             CheckForInvalidPlacedBushes();
-            GiveUnobtainableWalnuts();
+            RefreshWalnuts();
+            ReactivateGoldenParrot();
+        }
+
+        public void CheckForFirstLaunch()
+        {
+            if (disableWalnutCap) { return; }
+            if (Game1.MasterPlayer.mailReceived.Contains("Launched_GoldenWalnutFramework_For_This_Save")) { return; }
+            Game1.MasterPlayer.mailReceived.Add("Launched_GoldenWalnutFramework_For_This_Save");
+
+            if (Game1.netWorldState.Value.ActivatedGoldenParrot)
+            {
+                Game1.MasterPlayer.mailReceived.Add("gotBirdieReward"); //this fixes a bug from the game
+                ((IslandEast)Game1.getLocationFromName("IslandEast")).bananaShrineNutAwarded.Value = true; //this fixes a bug from the game
+            }
+
+            int current_nut_count = Game1.netWorldState.Value.GoldenWalnutsFound;
+            if (current_nut_count > 116)
+            {
+                if (Game1.player.team.collectedNutTracker.Any(walnut => !vanillaWalnutIDs.Contains(walnut))) { return; }
+                foreach (GameLocation location in Game1.locations)
+                {
+                    if (location is not IslandLocation island_location) { continue; }
+                    foreach (ParrotUpgradePerch perch in island_location.parrotUpgradePerches)
+                    {
+                        if (perch.currentState.Value == ParrotUpgradePerch.UpgradeState.Complete)
+                        {
+                            if (perch.upgradeName.Value != "GoldenParrot")
+                            {
+                                current_nut_count -= perch.requiredNuts.Value;
+                            }
+                        }
+                    }
+                }
+                if (Game1.MasterPlayer.hasOrWillReceiveMail("Island_VolcanoShortcutOut"))
+                {
+                    current_nut_count -= 5;
+                }
+                if (Game1.MasterPlayer.hasOrWillReceiveMail("Island_VolcanoBridge"))
+                {
+                    current_nut_count -= 5;
+                }
+                if (current_nut_count - Game1.netWorldState.Value.GoldenWalnuts > 0)
+                {
+                    Game1.player.team.collectedNutTracker.Add($"BoughtQiGemsForWalnuts_{current_nut_count - Game1.netWorldState.Value.GoldenWalnuts}");
+                }
+            }
+        }
+
+        public void RemoveBushes()
+        {
+            foreach (GameLocation l in Game1.locations)
+            {
+                for (int i = l.largeTerrainFeatures.Count - 1; i >= 0; i--)
+                {
+                    if (l.largeTerrainFeatures[i] is Bush bush && bush.size.Value == 4 && bush.modData.TryGetValue("ResoNight.GoldenWalnutFramework/CustomID", out var customID))
+                    {
+                        l.largeTerrainFeatures.Remove(bush);
+                    }
+                }
+            }
         }
 
         public void FillMainLists()
@@ -490,18 +621,18 @@ namespace GoldenWalnutFramework
             MainPatches.QiShopFlags.Clear();
             MainPatches.CustomWalnuts.Clear();
             excludedMapsFromSeasonalFeatures.Clear();
-            Custom_parrotUpgradePerches.Clear();
             unobtainableWalnuts.Clear();
             GameStateQueryWalnutGroups.Clear();
             disableWalnutCap = false;
+            triggeredBridgeOverlayAboveMoneybags = false;
             customHintForToday = null;
+            walnutDebt = 0;
 
             int walnutGroupCount = 0;
-            var json = Game1.content.Load<BaseJSON>("Mods/GoldenWalnutFramework/Data");
 
-            mf!.RegisterJSONSettings(json.Settings);
+            mf!.RegisterJSONSettings(JSONData.Settings);
 
-            foreach (var group in json.GoldenWalnuts)
+            foreach (var group in JSONData.GoldenWalnuts)
             {
                 if (string.IsNullOrWhiteSpace(group.Value.Hint))
                 {
@@ -513,7 +644,6 @@ namespace GoldenWalnutFramework
                     Monitor.Log($"Walnutgroup {group.Key} is missing a field for Walnuts!", LogLevel.Error);
                     continue;
                 }
-
                 if (group.Value.ShowThisHint == true)
                 {
                     if (group.Value.SeparateHint == true)
@@ -603,7 +733,7 @@ namespace GoldenWalnutFramework
                 }
                 GameStateQueryWalnutGroups[group.Key] = currentWalnutIDs;
             }
-            foreach (var perch in json.ParrotUpgradePerches)
+            foreach (var perch in JSONData.ParrotUpgradePerches)
             {
                 if (!mf!.CheckJSONPerches(perch)) { continue; }
                 var perchLocation = Game1.getLocationFromName(perch.Location);
@@ -613,19 +743,7 @@ namespace GoldenWalnutFramework
                     Monitor.Log($"ParrotUpgradePerch: '{perch.ID}' has the Location: {perch.Location} that could not be found in the game's locations", LogLevel.Error);
                     continue;
                 }
-                string perchName = perch.ID!;
-                if (perch.StoneAnimation == true)
-                {
-                    perchName += "-Volcano";
-                }
-                else
-                {
-                    if (perchName.Contains("Volcano"))
-                    {
-                        perchName = perchName.Replace("Volcano", "_______");
-                    }
-                    perchName += "-_______";
-                }
+                var perchName = getPerchName(perch);
                 if (perch.StickType != null)
                 {
                     TileSheet tileSheet;
@@ -653,7 +771,8 @@ namespace GoldenWalnutFramework
                 }
                 if (!Game1.MasterPlayer.mailReceived.Contains(perch.ID))
                 {
-                    Custom_parrotUpgradePerches.Add(new ParrotUpgradePerch(perchLocation, new Point(perch.ParrotTile!.X!.Value, perch.ParrotTile!.Y!.Value), new Microsoft.Xna.Framework.Rectangle(perch.ParrotArea!.X!.Value, perch.ParrotArea!.Y!.Value, perch.ParrotArea!.Width!.Value, perch.ParrotArea!.Height!.Value), perch.Nuts!.Value, () => { Game1.MasterPlayer.mailReceived.Add(perch.ID); SpentWalnutsForPUPs += (int)perch.Nuts; }, () => false, perchName, perch.Condition ?? ""));
+                    var perchToAdd = new ParrotUpgradePerch(perchLocation, new Point(perch.ParrotTile!.X!.Value, perch.ParrotTile!.Y!.Value), new Microsoft.Xna.Framework.Rectangle(perch.ParrotArea!.X!.Value, perch.ParrotArea!.Y!.Value, perch.ParrotArea!.Width!.Value, perch.ParrotArea!.Height!.Value), perch.Nuts!.Value, () => { Game1.player.team.RequestSetMail(StardewValley.Network.NetEvents.PlayerActionTarget.All, perch.ID, StardewValley.Network.NetEvents.MailType.Received, true); }, () => false, perchName, perch.MailConditions ?? "");
+                    CustomPUPLists[perchLocation].Add(perchToAdd);
                 }
                 else
                 {
@@ -667,7 +786,7 @@ namespace GoldenWalnutFramework
 
                 MainPatches.CustomPerches.Add(perch);
             }
-            foreach (var entry in json.Settings.SpentWalnuts ?? [])
+            foreach (var entry in JSONData.Settings.SpentWalnuts ?? [])
             {
                 string? mailFlag = entry.Key;
                 if (string.IsNullOrWhiteSpace(mailFlag))
@@ -700,6 +819,23 @@ namespace GoldenWalnutFramework
             //}
         }
 
+        public string getPerchName(CustomParrotUpgradePerch perch)
+        {
+            string perchName = perch.ID!;
+            if (perch.StoneAnimation == true)
+            {
+                perchName += "-Volcano";
+            }
+            else
+            {
+                if (perchName.Contains("Volcano"))
+                {
+                    perchName = perchName.Replace("Volcano", "_______");
+                }
+                perchName += "-_______";
+            }
+            return perchName;
+        }
         private void CalculateCap()
         {
             additionalGoldenWalnuts = 0;
@@ -733,20 +869,6 @@ namespace GoldenWalnutFramework
             }
         }
 
-        public void RemoveBushes()
-        {
-            foreach (GameLocation l in Game1.locations)
-            {
-                for (int i = l.largeTerrainFeatures.Count - 1; i >= 0; i--)
-                {
-                    if (l.largeTerrainFeatures[i] is Bush bush && bush.size.Value == 4 && bush.modData.TryGetValue("ResoNight.GoldenWalnutFramework/CustomID", out var customID))
-                    {
-                        l.largeTerrainFeatures.Remove(bush);
-                    }
-                }
-            }
-        }
-
         public void CheckForInvalidPlacedBushes()
         {
             foreach (var l in Game1.locations)
@@ -767,7 +889,7 @@ namespace GoldenWalnutFramework
             }
         }
 
-        public void GiveUnobtainableWalnuts()
+        public void RefreshWalnuts()
         {
             bool gaveAtLeastOne = false;
             foreach (string id in unobtainableWalnuts)
@@ -790,6 +912,88 @@ namespace GoldenWalnutFramework
                 Monitor.Log("------------------------------------------------------------", LogLevel.Warn);
                 Game1.addHUDMessage(new HUDMessage("You have received all the Golden Walnuts that are unobtainable. Check the Console", 3));
                 Monitor.Log("If you are a player, you can ignore this. If you are a modder, you added two Walnut Bushes at the same coordinates. If you see a double ID error above, you have two walnuts with the same ID. If you have another mod installed that also uses this Framework, you might share the same ID or Bush with that mod. Please make sure to use the ModID token for the ID and for the Bush, you can simply ignore this. Multiple mods adding the same Bush can happen and no mod should 'own' a Bush position.", LogLevel.Warn);
+            }
+            
+            if (!disableWalnutCap)
+            {
+                CalculateQiShopWalnuts();
+                int walnutCountBefore = Game1.netWorldState.Value.GoldenWalnuts;
+                int totalWalnutCountBefore = Game1.netWorldState.Value.GoldenWalnutsFound;
+                Game1.game1.RecountWalnuts();
+                if (walnutCountBefore != Game1.netWorldState.Value.GoldenWalnuts || totalWalnutCountBefore != Game1.netWorldState.Value.GoldenWalnutsFound)
+                {
+                    Game1.delayedActions.Add(new DelayedAction(200, () => Game1.player.currentLocation.playSound("cancel")));
+                    Game1.hudMessages.Add(new HUDMessage("Your Walnuts have been recalculated. Look into the console", 2));
+                    Monitor.Log("Your Walnutcount has been readjusted since it was off. This usually happens when you update a mod that removes Walnuts that you have already obtained, so nothing to worry about. If you are a modder, this also happens every time when a save has a walnut collected that you removed again, or when you saved the day after you gave yourself some Golden Walnuts through a command. This can also be a hint that you didn't register a walnut with the overall walnut system, for example if you added a custom walnut, but forgot to make the entry for the Framework.", LogLevel.Debug);
+                }
+            }
+        }
+
+        public int CalculateWalnutDebt(int stack)
+        {
+            walnutDebt -= stack;
+            if (walnutDebt > 0)
+            {
+                Game1.hudMessages.Add(new HUDMessage($"Good job! You are still {walnutDebt} Golden Walnuts in debt!", 2));
+                stack = 0;
+            }
+            else if (walnutDebt == 0)
+            {
+                Game1.hudMessages.Add(new HUDMessage("Great job! You are now free of any Walnut debt!", 1));
+                Game1.player.currentLocation.playSound("questcomplete");
+                stack = 0;
+            }
+            else
+            {
+                Game1.hudMessages.Add(new HUDMessage("Great job! You are now free of any Walnut debt!", 1));
+                Game1.player.currentLocation.playSound("questcomplete");
+                stack = Math.Abs(walnutDebt);
+                walnutDebt = 0;
+            }
+            return stack;
+        }
+
+        public void CalculateQiShopWalnuts()
+        {
+            int spendableWalnuts = 0;
+            foreach (var pup in MainPatches.CustomPerches)
+            {
+                spendableWalnuts += (int)pup.Nuts!;
+            }
+            foreach (var qiShopFlag in MainPatches.QiShopFlags)
+            {
+                spendableWalnuts += qiShopFlag.Value;
+            }
+            var nuttracker = Game1.player.team.collectedNutTracker;
+            string? boughtEntry = nuttracker.FirstOrDefault(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_"));
+            if (boughtEntry != null)
+            {
+                int bought = int.Parse(boughtEntry.Split('_')[1]);
+                int difference = additionalGoldenWalnuts - spendableWalnuts;
+                if (difference < 0)
+                {
+                    Game1.delayedActions.Add(new DelayedAction(200, () => Game1.player.currentLocation.playSound("cancel")));
+                    Game1.hudMessages.Add(new HUDMessage("There are not enough obtainable Walnuts! See the console", 3));
+                    Monitor.Log($"{Math.Abs(difference)} Golden Walnuts are missing to complete every ParrotUpgradePerch and other way to spend Walnuts. If you are a player, you have to give yourself the Walnuts to compensate. But since they get recalculated every time you load into a save, you have to give them to yourself when you actually need to spend them. You do this by typing 'debug item 73 x' into the SMAPI console and for x the amount of total walnuts. If you are a modder, please add more walnuts or remove ParrotUpgradePerches or reduce the amount of walnuts needed to complete them. Also look at every custom way to spend walnuts that you potentially added. Make sure to not softlock the player!", LogLevel.Error);
+                    return;
+                }
+                if (bought > spendableWalnuts)
+                {
+                    nuttracker.RemoveWhere(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_"));
+                    nuttracker.Add($"BoughtQiGemsForWalnuts_{spendableWalnuts}");
+                    Game1.netWorldState.Value.GoldenWalnuts += bought - spendableWalnuts;
+                    Game1.hudMessages.Add(new HUDMessage("You gained Qi shop walnuts, read the console", 2));
+                    Monitor.Log("You spent more walnuts at Mr Qi's Gem Shop than you should be able to. This can usually happen after you install an update for any walnut related mod, so don't worry about it", LogLevel.Debug);
+                }
+            }
+        }
+
+        public void ReactivateGoldenParrot()
+        {
+            if (Game1.netWorldState.Value.ActivatedGoldenParrot && Game1.netWorldState.Value.GoldenWalnutsFound < GoldenWalnutCap)
+            {
+                Game1.netWorldState.Value.ActivatedGoldenParrot = false; 
+                Game1.player.mailReceived.Remove("activateGoldenParrotsTonight");
             }
         }
 
@@ -931,7 +1135,6 @@ namespace GoldenWalnutFramework
             if (dayIsResetting) { return; }
             if (!e.Removed.Any()) { return; }
             if (!Game1.getAllFarmers().Any(farmer => farmer.currentLocation == e.Location)) { return; }
-
             foreach (var removedNPC in e.Removed)
             {
                 if (!removedNPC.IsMonster) { continue; }
@@ -998,6 +1201,11 @@ namespace GoldenWalnutFramework
 
         private void Player_Warped(object? sender, WarpedEventArgs e)
         {
+            if (walnutDebt > 0 && Game1.netWorldState.Value.GoldenWalnuts > 0)
+            {
+                Monitor.Log("It seems like you were hiding some walnuts. They have been taken from you to pay the debt!", LogLevel.Debug); ;
+                Game1.netWorldState.Value.GoldenWalnuts = CalculateWalnutDebt(Game1.netWorldState.Value.GoldenWalnuts);
+            }
             if (e.NewLocation.InIslandContext() || e.NewLocation.InDesertContext() || excludedMapsFromSeasonalFeatures.Contains(e.NewLocation.Name))
             {
                 if (seasonalTerrainFeatures != false)
@@ -1027,17 +1235,17 @@ namespace GoldenWalnutFramework
 
         private void Content_AssetRequested(object? sender, AssetRequestedEventArgs e)
         {
-            if (e.Name.IsEquivalentTo("Mods/GoldenWalnutFramework/Data"))
+            if (e.Name.IsEquivalentTo("Mods/GoldenWalnutFramework/GoldenWalnuts"))
             {
-                e.LoadFrom(
-                    () => new BaseJSON
-                        {
-                            GoldenWalnuts = new(),
-                            ParrotUpgradePerches = new(),
-                            Settings = new()
-                        },
-                    AssetLoadPriority.Exclusive
-                );
+                e.LoadFrom(() => new Dictionary<string, WalnutGroup>(), AssetLoadPriority.Exclusive);
+            }
+            else if (e.Name.IsEquivalentTo("Mods/GoldenWalnutFramework/ParrotUpgradePerches"))
+            {
+                e.LoadFrom(() => new List<CustomParrotUpgradePerch>(), AssetLoadPriority.Exclusive);
+            }
+            else if (e.Name.IsEquivalentTo("Mods/GoldenWalnutFramework/Settings"))
+            {
+                e.LoadFrom(() => new Settings(), AssetLoadPriority.Exclusive);
             }
             else if (e.Name.IsEquivalentTo("TileSheets/bushes"))
             {
@@ -1144,50 +1352,31 @@ namespace GoldenWalnutFramework
                     valid_customHint = valid_customHints.FirstOrDefault(h => h.Key == customHintForToday);
                 }
 
-
-
-                if (valid_customHint.Key != null)
-                {
-                    string customHint = valid_customHint.Key;
-                    if (valid_customHint.Value == 1 && customHint.Contains("{0}"))
-                    {
-                        for (int i = 0; i < MainPatches.SeparateWalnutGroups.Count; i++)
-                        {
-                            if (MainPatches.SeparateWalnutGroups[i].Key == customHint)
-                            {
-                                if (MainPatches.SeparateWalnutGroupsSingular[i] != "NoSingularAssigned")
-                                {
-                                    customHint = MainPatches.SeparateWalnutGroupsSingular[i];
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    __instance.hintShowTime = 2f;
-                    __instance.hintDialogues.Add("Custom Walnuts");
-                    __instance.hintDialogues.Add(string.Format(customHint, valid_customHint.Value));
-                }
-                else
+                if (valid_customHint.Key == null)
                 {
                     Random r = Utility.CreateRandom(Game1.uniqueIDForThisGame, Game1.Date.TotalDays * 642.0);
                     valid_customHint = valid_customHints[r.Next(valid_customHints.Count)];
-                    string customHint = valid_customHint.Key;
-                    customHintForToday = customHint;
-                    if (valid_customHint.Value == 1)
+                    customHintForToday = valid_customHint.Key;
+                }
+
+                string customHint = valid_customHint.Key;
+                if (valid_customHint.Value == 1 && customHint.Contains("{0}"))
+                {
+                    for (int i = 0; i < MainPatches.SeparateWalnutGroups.Count; i++)
                     {
-                        for (int i = 0; i < MainPatches.SeparateWalnutGroups.Count; i++)
+                        if (MainPatches.SeparateWalnutGroups[i].Key == customHint)
                         {
-                            if (MainPatches.SeparateWalnutGroups[i].Key == customHint)
+                            if (MainPatches.SeparateWalnutGroupsSingular[i] != "NoSingularAssigned")
                             {
                                 customHint = MainPatches.SeparateWalnutGroupsSingular[i];
-                                break;
                             }
+                            break;
                         }
                     }
-                    __instance.hintShowTime = 2f;
-                    __instance.hintDialogues.Add("Custom Walnuts");
-                    __instance.hintDialogues.Add(string.Format(customHint, valid_customHint.Value));
                 }
+                __instance.hintShowTime = 2f;
+                __instance.hintDialogues.Add("Custom Walnuts");
+                __instance.hintDialogues.Add(string.Format(customHint, valid_customHint.Value));
             }
         }
     }
@@ -1203,6 +1392,8 @@ namespace GoldenWalnutFramework
                 if (perch.ID == mailFlag)
                 {
                     ExecutePerch(perch);
+                    var perchName = m.getPerchName(perch);
+                    
                     break;
                 }
             }
@@ -1746,6 +1937,21 @@ namespace GoldenWalnutFramework
             }
         }
 
+        public void ResetQiShopWalnuts(string command, string[] args)
+        {
+            if (!Context.IsWorldReady) { m.Monitor.Log(LogCommandError, LogLevel.Error); return; }
+
+            if (Game1.player.team.collectedNutTracker.RemoveWhere(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_")) > 0)
+            {
+                m.Monitor.Log("Successfully set spent Walnuts at the Qi Gem Shop count back to zero. Remember to save the day!", LogLevel.Info);
+                Game1.game1.RecountWalnuts();
+            }
+            else
+            {
+                m.Monitor.Log("The count of spent walnuts at Mr Qi's Gem Shop is already zero!", LogLevel.Info);
+            }
+        }
+
         public bool WalnutGroupGSQ(string[] query, GameStateQueryContext context)
         {
             if (query.Length < 2)
@@ -1788,14 +1994,21 @@ namespace GoldenWalnutFramework
         public static List<CustomParrotUpgradePerch> CustomPerches = [];
 
         
-        public static void foundWalnut_Prefix(int stack)
+        public static void foundWalnut_Prefix(ref int stack)
         {
             if (m.playJingle)
             {
                 Game1.delayedActions.Add(new DelayedAction(150, () => Game1.playSound("jingle1")));
                 m.playJingle = false;
             }
-
+            if (m.walnutDebt > 0)
+            {
+                stack = m.CalculateWalnutDebt(stack);
+                if (stack  == 0)
+                {
+                    Game1.playSound("goldenWalnut");
+                }
+            }
             if (Game1.netWorldState.Value.GoldenWalnutsFound >= 130 && (m.disableWalnutCap == true || Game1.netWorldState.Value.GoldenWalnutsFound < ModEntry.Instance!.GoldenWalnutCap))
             {
                 Game1.netWorldState.Value.GoldenWalnuts += stack;
@@ -1804,27 +2017,23 @@ namespace GoldenWalnutFramework
             }
         }
 
-        public static void RecountWalnuts_Postfix()
+        public static bool RecountWalnuts_Prefix()
         {
             if (!Game1.IsMasterGame || Game1.getLocationFromName("IslandHut") is not IslandHut hut)
             {
-                return;
+                return false;
             }
+            var nuttracker = Game1.player.team.collectedNutTracker;
             int current_nut_count = ModEntry.Instance!.GoldenWalnutCap - hut.ShowNutHint();
             foreach (var group in SeparateWalnutGroups)
             {
                 foreach (string id in group.Value)
                 {
-                    if (!Game1.player.team.collectedNutTracker.Contains(id))
+                    if (!nuttracker.Contains(id))
                     {
                         current_nut_count--;
                     }
                 }
-                
-            }
-            if (Game1.netWorldState.Value.ActivatedGoldenParrot && !Game1.MasterPlayer.mailReceived.Contains("gotBirdieReward"))
-            {
-                current_nut_count += 5;
             }
             Game1.netWorldState.Value.GoldenWalnutsFound = current_nut_count;
             foreach (GameLocation location in Game1.locations)
@@ -1834,13 +2043,12 @@ namespace GoldenWalnutFramework
                 {
                     if (perch.currentState.Value == ParrotUpgradePerch.UpgradeState.Complete)
                     {
-                        current_nut_count -= perch.requiredNuts.Value;
+                        if (perch.requiredNuts.Value > 0 )
+                        {
+                            current_nut_count -= perch.requiredNuts.Value;
+                        }
                     }
                 }
-            }
-            if (Game1.netWorldState.Value.ActivatedGoldenParrot)
-            {
-                current_nut_count--; //Golden Parrot has requiredNuts Value -1
             }
             if (Game1.MasterPlayer.hasOrWillReceiveMail("Island_VolcanoShortcutOut"))
             {
@@ -1861,11 +2069,31 @@ namespace GoldenWalnutFramework
             {
                 if (Game1.MasterPlayer.mailReceived.Contains(flag.Key))
                 {
-                    m.Monitor.Log($"{flag.Key}, {flag.Value}", LogLevel.Debug);
                     current_nut_count -= flag.Value;
                 }
             }
+            int bought = 0;
+            string? boughtEntry = nuttracker.FirstOrDefault(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_"));
+            if (boughtEntry != null)
+            {
+                bought = int.Parse(boughtEntry.Split('_')[1]);
+                current_nut_count -= bought;
+            }
+            if (current_nut_count < 0 && bought > 0)
+            {
+                current_nut_count += bought;
+                nuttracker.RemoveWhere(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_"));
+                m.Monitor.Log("You have regained the walnuts that you spent at Mr Qi's Gem Shop so that your Walnutcount doesn't get negative after the recalculation. This can usually happen after updating any Walnut related mod.", LogLevel.Debug);
+            }
+            if (current_nut_count < 0)
+            {
+                Game1.delayedActions.Add(new DelayedAction(200, () => Game1.player.currentLocation.playSound("cancel")));
+                Game1.hudMessages.Add(new HUDMessage("You are in Walnut debt! look into the console.", 3));
+                m.Monitor.Log($"Unfortunately, after recalculating your walnuts, you have {current_nut_count} walnuts! This can happen if you updated any walnut related mod and you currently have more ParrotUpgradePerches completed than you should be able to with your overall collected Walnut count! Unfortunately, the next {Math.Abs(current_nut_count)} walnuts that you collect will be taken away from you! You criminal", LogLevel.Warn);
+                m.walnutDebt = Math.Abs(current_nut_count);
+            }
             Game1.netWorldState.Value.GoldenWalnuts = current_nut_count;
+            return false;
         }
 
         public static IEnumerable<CodeInstruction> ShowNutHint_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
@@ -2011,16 +2239,14 @@ namespace GoldenWalnutFramework
             }
         }
 
-        public static void IslandNorthGoldenParrot_Postfix(IslandNorth __instance)
+        public static void IslandNorthItself_Postfix(IslandNorth __instance)
         {
             IslandNorth islandNorth = (IslandNorth)Game1.getLocationFromName("IslandNorth");
             if (islandNorth == null) { return; }
-            int walnutsFound = Game1.netWorldState.Value.GoldenWalnutsFound;
-            if (!Game1.netWorldState.Value.ActivatedGoldenParrot && walnutsFound < ModEntry.Instance?.GoldenWalnutCap && walnutsFound >= 130)
+            if (!Game1.netWorldState.Value.ActivatedGoldenParrot && Game1.netWorldState.Value.GoldenWalnutsFound < ModEntry.Instance?.GoldenWalnutCap && Game1.netWorldState.Value.GoldenWalnutsFound >= 130)
             {
                 islandNorth.parrotUpgradePerches.Add(new ParrotUpgradePerch(__instance, new Point(14, 14), new Microsoft.Xna.Framework.Rectangle(2, 2, __instance.Map.Layers[0].LayerWidth - 4, __instance.Map.Layers[0].LayerHeight - 4), -1, delegate
-                {
-                }, () => false, "GoldenParrot"));
+                { }, () => false, "GoldenParrot"));
             }
         }
 
@@ -2031,6 +2257,13 @@ namespace GoldenWalnutFramework
                 string? request_text = null;
                 if (__instance.upgradeName.Value == "GoldenParrot")
                 {
+                    if (Game1.netWorldState.Value.GoldenWalnutsFound >= m.GoldenWalnutCap)
+                    {
+                        __instance.squawkTime = 0.5f;
+                        __instance.shakeTime = 0.5f;
+                        Game1.playSound("parrot_squawk");
+                        return;
+                    }
                     request_text = Game1.content.LoadStringReturnNullIfNotFound("Strings\\1_6_Strings:GoldenParrot");
                 }
                 GameLocation location = __instance.locationRef.Value;
@@ -2108,8 +2341,6 @@ namespace GoldenWalnutFramework
         public static void ActivateGoldenParrot_Postfix()
         {
             var nuttracker = Game1.player.team.collectedNutTracker;
-            int Before = nuttracker.Count;
-
             foreach (var walnut in CustomWalnuts)
             {
                 if (walnut.Count > 1)
@@ -2124,26 +2355,30 @@ namespace GoldenWalnutFramework
                     nuttracker.Add(walnut.ID);
                 }
             }
-            int After = nuttracker.Count;
-            
-
-            Game1.netWorldState.Value.GoldenWalnuts += After - Before;
-            Game1.netWorldState.Value.GoldenWalnutsFound = ModEntry.Instance!.GoldenWalnutCap;
-            Game1.MasterPlayer.mailReceived.Add("gotBirdieReward");
-
-            foreach (string l in WalnutLocations)
+            Game1.MasterPlayer.mailReceived.Add("gotBirdieReward"); //this fixes a bug from the game
+            ((IslandEast)Game1.getLocationFromName("IslandEast")).bananaShrineNutAwarded.Value = true; //this fixes a bug from the game
+            if (m.disableWalnutCap)
             {
-                GameLocation location = Game1.getLocationFromName(l);
-                if (location.largeTerrainFeatures == null) { continue; }
-                foreach (LargeTerrainFeature largeTerrainFeature in location.largeTerrainFeatures)
+                m.Monitor.Log("DisableWalnutCap has been set to true, therefore your Walnut Count might be weird.", LogLevel.Warn);
+            }
+            else
+            {
+                Game1.game1.RecountWalnuts();
+            }
+
+                foreach (string l in WalnutLocations)
                 {
-                    if (largeTerrainFeature is Bush bush && bush.size.Equals(4))
+                    GameLocation location = Game1.getLocationFromName(l);
+                    if (location.largeTerrainFeatures == null) { continue; }
+                    foreach (LargeTerrainFeature largeTerrainFeature in location.largeTerrainFeatures)
                     {
-                        bush.tileSheetOffset.Value = 0;
-                        bush.setUpSourceRect();
+                        if (largeTerrainFeature is Bush bush && bush.size.Value == 4)
+                        {
+                            bush.tileSheetOffset.Value = 0;
+                            bush.setUpSourceRect();
+                        }
                     }
                 }
-            }
         }
 
         public static void donatePiece_Prefix(int which)
@@ -2193,7 +2428,7 @@ namespace GoldenWalnutFramework
             var nuttracker = who.team.collectedNutTracker;
             foreach (var walnut in CustomWalnuts)
             {
-                if (walnut.Type!.Equals("Fishing", StringComparison.OrdinalIgnoreCase)) { continue; }
+                if (!walnut.Type!.Equals("Fishing", StringComparison.OrdinalIgnoreCase)) { continue; }
                 if (nuttracker.Contains(walnut.ID) || nuttracker.Contains($"{walnut.ID}_{walnut.Count}")) { continue; }
                 if (!location.Name.Equals(walnut.Location, StringComparison.OrdinalIgnoreCase)) { continue; }
                 if (!GameStateQuery.CheckConditions(walnut.Conditions)) { continue; }
@@ -2262,105 +2497,29 @@ namespace GoldenWalnutFramework
                 }
             }
         }
-    }
 
-    internal static class BasePatches
-    {
-        public static void GameLocationResetLocalStateHarmony_Postfix(GameLocation __instance)
+        public static bool SandDuggyOnWhackedChangedHarmony_Prefix()
         {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
-            {
-                if (perch.locationRef?.Value != __instance) { continue; }
-                perch.ResetForPlayerEntry();
-            }
+            return !Game1.player.team.collectedNutTracker.Contains("SandDuggy"); //this fixes a bug from the game
         }
 
-        public static void GameLocationUpdateWhenCurrentLocationHarmony_Postfix(GameTime time, GameLocation __instance)
+        public static void ShopMenuConsumeTradeItemHarmony_Prefix(string itemId, int count)
         {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
+            if (ModEntry.Instance!.disableWalnutCap) { return; }
+            if (ItemRegistry.QualifyItemId(itemId) == "(O)73" && Game1.activeClickableMenu is ShopMenu shop && shop.ShopId == "QiGemShop")
             {
-                if (perch.locationRef?.Value != __instance) { continue; }
-                perch.Update(time);
-            }
-        }
-
-        public static void GameLocationDrawHarmony_Postfix(SpriteBatch b, GameLocation __instance)
-        {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
-            {
-                if (perch.locationRef?.Value != __instance) { continue; }
-                perch.Draw(b);
-            }
-        }
-
-
-        public static void GameLocationAnswerDialogueHarmony_Postfix(Response answer, GameLocation __instance, ref bool __result)
-        {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
-            {
-                if (perch.locationRef?.Value != __instance) { continue; }
-                __result = true;
-            }
-        }
-
-        public static void GameLocationCleanupBeforePlayerExitHarmony_Postfix(GameLocation __instance)
-        {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
-            {
-                if (perch.locationRef?.Value != __instance) { continue; }
-                perch.Cleanup();
-            }
-        }
-
-        public static void GameLocationUpdateEvenIfFarmerIsntHereHarmony_Postfix(GameTime time, GameLocation __instance, bool ignoreWasUpdatedFlush = false)
-        {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
-            {
-                if (perch.locationRef?.Value != __instance) { continue; }
-                perch.UpdateEvenIfFarmerIsntHere(time);
-            }
-        }
-
-        public static void GameLocationTransferDataFromSavedLocationHarmony_Postfix(GameLocation l)
-        {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
-            {
-                if (perch.locationRef?.Value != l) { continue; }
-                perch.UpdateCompletionStatus();
-            }
-        }
-
-        public static void GameLocationIsActionableTileHarmony_Postfix(int xTile, int yTile, Farmer who, GameLocation __instance, ref bool __result)
-        {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
-            {
-                if (perch.locationRef?.Value != __instance) { continue; }
-                if (perch.IsAtTile(xTile, yTile) && perch.IsAvailable(use_cached_value: true) && perch.parrotPresent)
+                var nuttracker = Game1.player.team.collectedNutTracker;
+                string? boughtEntry = nuttracker.FirstOrDefault(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_"));
+                if (boughtEntry != null)
                 {
-                    __result = true;
+                    int bought = int.Parse(boughtEntry.Split('_')[1]);
+                    count += bought;
+                    nuttracker.RemoveWhere(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_"));
                 }
-            }
-        }
-        public static void GameLocationCheckActionHarmony_Postfix(Location tileLocation, Microsoft.Xna.Framework.Rectangle viewport, Farmer who, GameLocation __instance, ref bool __result)
-        {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
-            {
-                if (perch.locationRef?.Value != __instance) { continue; }
-                if (perch.CheckAction(tileLocation, who))
-                {
-                    __result = true;
-                }
+                nuttracker.Add($"BoughtQiGemsForWalnuts_{count}");
             }
         }
 
-        public static void GameLocationDrawAboveAlwaysFrontLayerHarmony_Postfix(SpriteBatch b, GameLocation __instance)
-        {
-            foreach (ParrotUpgradePerch perch in ModEntry.Instance!.Custom_parrotUpgradePerches)
-            {
-                if (perch.locationRef?.Value != __instance) { continue; }
-                perch.DrawAboveAlwaysFrontLayer(b);
-            }
-        }
         public static bool bushHasWalnut = true;
         public static void BushShake_Prefix(Bush __instance)
         {
@@ -2383,16 +2542,190 @@ namespace GoldenWalnutFramework
                 Game1.delayedActions.Add(new DelayedAction(10, () => Game1.player.team.collectedNutTracker.Remove(generatedID)));
                 Game1.player.team.collectedNutTracker.Add(customID);
             }
-            
+
         }
     }
 
-
-    public class BaseJSON
+    internal static class BasePatches
     {
-        public List<CustomParrotUpgradePerch> ParrotUpgradePerches { get; set; } = new();
-        public Dictionary<string, WalnutGroup> GoldenWalnuts { get; set; } = new();
-        public Settings Settings { get; set; } = new();
+        public static NetList<ParrotUpgradePerch, NetRef<ParrotUpgradePerch>> GetPUPs(GameLocation location)
+        {
+            if (m.CustomPUPLists.TryGetValue(location, out var PUPs))
+            {
+                return PUPs;
+            }
+            return [];
+        }
+
+        public static void GameLocationInitNetFieldsHarmony_Postfix(GameLocation __instance)
+        {
+            var customPUPs = new NetList<ParrotUpgradePerch, NetRef<ParrotUpgradePerch>>();
+
+            __instance.NetFields.AddField(customPUPs, "GoldenWalnutFramework/CustomParrotUpgradePerches");
+            m.CustomPUPLists.Add(__instance, customPUPs);
+        }
+
+        public static void GameLocationResetLocalStateHarmony_Postfix(GameLocation __instance)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(__instance))
+            {
+                perch.ResetForPlayerEntry();
+            }
+        }
+
+        public static void GameLocationUpdateWhenCurrentLocationHarmony_Postfix(GameTime time, GameLocation __instance)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(__instance))
+            {
+                perch.Update(time);
+            }
+        }
+
+        public static void GameLocationDrawHarmony_Postfix(SpriteBatch b, GameLocation __instance)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(__instance))
+            {
+                perch.Draw(b);
+            }
+        }
+
+
+        public static void GameLocationAnswerDialogueHarmony_Postfix(Response answer, GameLocation __instance, ref bool __result)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(__instance))
+            {
+                __result = true;
+            }
+        }
+
+        public static void GameLocationCleanupBeforePlayerExitHarmony_Postfix(GameLocation __instance)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(__instance))
+            {
+                perch.Cleanup();
+            }
+        }
+
+        public static void GameLocationUpdateEvenIfFarmerIsntHereHarmony_Postfix(GameTime time, GameLocation __instance, bool ignoreWasUpdatedFlush = false)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(__instance))
+            {
+                perch.UpdateEvenIfFarmerIsntHere(time);
+            }
+        }
+
+        public static void GameLocationTransferDataFromSavedLocationHarmony_Postfix(GameLocation l)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(l))
+            {
+                perch.UpdateCompletionStatus();
+            }
+        }
+
+        public static void GameLocationIsActionableTileHarmony_Postfix(int xTile, int yTile, Farmer who, GameLocation __instance, ref bool __result)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(__instance))
+            {
+                if (perch.IsAtTile(xTile, yTile) && perch.IsAvailable(use_cached_value: true) && perch.parrotPresent)
+                {
+                    __result = true;
+                }
+            }
+        }
+        public static void GameLocationCheckActionHarmony_Postfix(Location tileLocation, Microsoft.Xna.Framework.Rectangle viewport, Farmer who, GameLocation __instance, ref bool __result)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(__instance))
+            {
+                if (perch.CheckAction(tileLocation, who))
+                {
+                    __result = true;
+                }
+            }
+        }
+
+        public static void GameLocationDrawAboveAlwaysFrontLayerHarmony_Postfix(SpriteBatch b, GameLocation __instance)
+        {
+            foreach (ParrotUpgradePerch perch in GetPUPs(__instance))
+            {
+                if (perch.locationRef?.Value != __instance) { continue; }
+                perch.DrawAboveAlwaysFrontLayer(b);
+            }
+        }
+    }
+
+    internal class RemainingNutsToken
+    {
+        public static ModEntry m = ModEntry.Instance!;
+        public bool AllowsInput()
+        {
+            return true;
+        }
+        public bool RequiresInput()
+        {
+            return true;
+        }
+        public bool CanHaveMultipleValues(string? input = null)
+        {
+            return true;
+        }
+        public bool UpdateContext()
+        {
+            return true;
+        }
+        public bool IsReady()
+        {
+            return Context.IsWorldReady;
+        }
+        public IEnumerable<string> GetValues(string? input)
+        {
+            if (input == null) 
+            {
+                m.Monitor.Log("You used the RemainingWalnutsInGroup token, but didn't give it any arguments. Please use the token like this: {{ResoNight.GoldenWalnutFramework/RemainingWalnutsInGroup:...}} and for the ..., you enter either 'all' or the key of one of the Walnutgroups that you added. You can also enter multiple keys for walnutgroups, separated by a comma, like this: {{ResoNight.GoldenWalnutFramework/RemainingWalnutsInGroup:Groupkey1, Groupkey2, Groupkey3}}. As of now, the token will always just give you 0!", LogLevel.Error);
+                yield return "0";
+                yield break;
+            }
+            string[] arguments = input.Split(", ");
+            var nuttracker = Game1.player.team.collectedNutTracker;
+            int remainingNuts = 0;
+            if (arguments.Any(arg => arg.Equals("All", StringComparison.OrdinalIgnoreCase)))
+            {
+                if (arguments.Count() > 1)
+                {
+                    m.Monitor.Log("For the RemainingWalnutsInGroup token, you added more arguments than just All. Note that if you use all as an argument, only that argument will be worked with.", LogLevel.Warn);
+                }
+                foreach (var group in m.GameStateQueryWalnutGroups)
+                {
+                    foreach (var walnut in group.Value ?? [])
+                    {
+
+                        if (!nuttracker.Contains(walnut))
+                        {
+                            remainingNuts++;
+                        }
+                    }
+                }
+                yield return remainingNuts.ToString();
+                yield break;
+            }
+            foreach (var arg in arguments ?? [])
+            {
+                if (m.GameStateQueryWalnutGroups.TryGetValue(arg, out var walnutIDs))
+                {
+                    foreach (var walnut in walnutIDs ?? [])
+                    {
+                        if (!nuttracker.Contains(walnut))
+                        {
+                            remainingNuts++;
+                        }
+                    }
+                }
+                else
+                {
+                    m.Monitor.Log($"Value '{arg}' for the RemainingWalnutsInGroup Token does not match any of the Walnutgroups in the 'Mods/GoldenWalnutFramework/Data' file and is also not 'all'", LogLevel.Error);
+                }
+            }
+            yield return remainingNuts.ToString();
+        }
     }
 
     public class WalnutGroup
@@ -2405,7 +2738,21 @@ namespace GoldenWalnutFramework
         public List<CustomWalnut>? Walnuts { get; set; }
     }
 
-    
+    public static class JSONData
+    {
+        public static Dictionary<string, WalnutGroup> GoldenWalnuts { get; private set; } = new();
+        public static List<CustomParrotUpgradePerch> ParrotUpgradePerches { get; private set; } = new();
+        public static Settings Settings { get; private set; } = new();
+
+        public static void LoadFiles()
+        {
+            GoldenWalnuts = Game1.content.Load<Dictionary<string, WalnutGroup>>("Mods/GoldenWalnutFramework/GoldenWalnuts");
+            ParrotUpgradePerches = Game1.content.Load<List<CustomParrotUpgradePerch>>("Mods/GoldenWalnutFramework/ParrotUpgradePerches");
+            Settings = Game1.content.Load<Settings>("Mods/GoldenWalnutFramework/Settings");
+        }
+    }
+
+
     public class CustomParrotUpgradePerch
     {
         public string? ID { get; set; }
@@ -2419,7 +2766,7 @@ namespace GoldenWalnutFramework
         public JSONRect? FromArea { get; set; }
         public JSONRect? ToArea { get; set; }
         public string? FromFile { get; set; }
-        public string? Condition { get; set; }
+        public string? MailConditions { get; set; }
 
     }
 
@@ -2473,5 +2820,13 @@ namespace GoldenWalnutFramework
         public List<string>? DisableSeasonalFeaturesForMaps  { get; set; }
         public Dictionary<string, int>? SpentWalnuts { get; set; }
 
+    }
+}
+
+namespace ContentPatcher
+{
+    public interface IContentPatcherAPI
+    {
+        void RegisterToken(IManifest mod, string name, object token);
     }
 }

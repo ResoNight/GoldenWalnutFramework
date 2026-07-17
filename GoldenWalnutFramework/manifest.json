@@ -1,10 +1,11 @@
 ﻿{
         "Name": "Golden Walnut Framework",
         "Author": "ResoNight",
-        "Version": "1.0.1",
+        "Version": "2.0.0",
         "Description": "adds a Framework for modders to add more Golden Walnuts and Parrot Upgrade Perches",
         "UniqueID": "ResoNight.GoldenWalnutFramework",
         "EntryDll": "GoldenWalnutFramework.dll",
         "MinimumApiVersion": "4.0.0",
-        "UpdateKeys": [ "Nexus:47699" ]
+        "UpdateKeys": [ "Nexus:47699" ],
+        "Dependencies": [{ "UniqueID": "Pathoschild.ContentPatcher", "IsRequired": false }]
 }
