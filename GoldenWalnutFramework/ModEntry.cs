@@ -538,6 +538,7 @@ namespace GoldenWalnutFramework
             Game1.MasterPlayer.mailReceived.OnValueAdded += mf!.MailReceived_OnValueAdded;
             Helper.GameContent.InvalidateCache("TileSheets/bushes");
             Helper.GameContent.InvalidateCache("TerrainFeatures/tree_palm");
+            JSONData.LoadFiles();
 
             CheckForFirstLaunch();
             RemoveBushes();
