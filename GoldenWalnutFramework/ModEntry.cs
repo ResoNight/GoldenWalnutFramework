@@ -46,7 +46,6 @@ namespace GoldenWalnutFramework
         public bool triggeredBridgeOverlayAboveMoneybags = false;
         public bool? seasonalTerrainFeatures = null;
         public HashSet<string> excludedMapsFromSeasonalFeatures = new(StringComparer.OrdinalIgnoreCase);
-        //public List<ParrotUpgradePerch> Custom_parrotUpgradePerches = [];
         public List<KeyValuePair<string, Vector2>> vanillaBushes = [];
         public HashSet<string> unobtainableWalnuts = [];
         public Dictionary<string, string[]> GameStateQueryWalnutGroups = [];
@@ -814,10 +813,6 @@ namespace GoldenWalnutFramework
                     Monitor.Log($"If you are a player, ignore this. You added the location {location} in the disableSeasonalFeaturesForMaps that is not an existing location!", LogLevel.Warn);
                 }
             }
-            //if (walnutGroupCount != walnutGroupCountForTranspiler)
-            //{
-            //    Monitor.Log("It seems like you changed the amount of Walnutgroups while the game is loaded. This means that the in-Game command '/recountNuts' will be wrong and the hints at the Parrot in the Islandhut won't be correct. This will be fixed after restarting the game", LogLevel.Warn);
-            //}
         }
 
         public string getPerchName(CustomParrotUpgradePerch perch)
