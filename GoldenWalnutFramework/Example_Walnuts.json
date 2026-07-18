@@ -1072,20 +1072,9 @@
         },
         {
             "Action": "EditData",
-            "Target": "Mods/GoldenWalnutFrmaework/Settings",
-            "Fields": {
-                "SpentWalnuts": {
-                    "{{ModID}}_GotFountainWalnuts": 1
-                }
-            }
-        },
-        {
-            "Action": "EditData",
-            "Target": "Mods/GoldenWalnutFramework/Data",
+            "Target": "Mods/GoldenWalnutFrmaework/SpentWalnuts",
             "Entries": {
-                "GoldenWalnuts": {},
-                "ParrotUpgradePerches": [],
-                "Settings": {}
+                "{{ModID}}_GotFountainWalnuts": 1
             }
         },
         {
