@@ -4,6 +4,7 @@ using System.ComponentModel.Design;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Reflection.Metadata.Ecma335;
+using System.Security;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -40,7 +41,6 @@ namespace GoldenWalnutFramework
         public int vanillaWalnutCount = 0;
         public int currentWalnutCountForShops = 0;
         public int walnutDebt = 0;
-        public bool disableWalnutCap = false;
         public bool dayIsResetting = true;
         public bool playJingle = false;
         public bool triggeredBridgeOverlayAboveMoneybags = false;
@@ -504,7 +504,7 @@ namespace GoldenWalnutFramework
             JSONData.LoadFiles();
 
 
-            mf!.RegisterJSONSettings(JSONData.Settings);
+            mf!.RegisterJSONSettings();
             foreach (var perch in JSONData.ParrotUpgradePerches)
             {
                 mf!.CheckJSONPerches(perch);
@@ -551,7 +551,7 @@ namespace GoldenWalnutFramework
 
         public void CheckForFirstLaunch()
         {
-            if (disableWalnutCap) { return; }
+            if (DisableWalnutCap.disableWalnutCap) { return; }
             if (Game1.MasterPlayer.mailReceived.Contains("Launched_GoldenWalnutFramework_For_This_Save")) { return; }
             Game1.MasterPlayer.mailReceived.Add("Launched_GoldenWalnutFramework_For_This_Save");
 
@@ -623,14 +623,13 @@ namespace GoldenWalnutFramework
             excludedMapsFromSeasonalFeatures.Clear();
             unobtainableWalnuts.Clear();
             GameStateQueryWalnutGroups.Clear();
-            disableWalnutCap = false;
             triggeredBridgeOverlayAboveMoneybags = false;
             customHintForToday = null;
             walnutDebt = 0;
 
             int walnutGroupCount = 0;
 
-            mf!.RegisterJSONSettings(JSONData.Settings);
+            mf!.RegisterJSONSettings();
 
             foreach (var group in JSONData.GoldenWalnuts)
             {
@@ -786,7 +785,7 @@ namespace GoldenWalnutFramework
 
                 MainPatches.CustomPerches.Add(perch);
             }
-            foreach (var entry in JSONData.Settings.SpentWalnuts ?? [])
+            foreach (var entry in JSONData.SpentWalnuts ?? [])
             {
                 string? mailFlag = entry.Key;
                 if (string.IsNullOrWhiteSpace(mailFlag))
@@ -910,7 +909,7 @@ namespace GoldenWalnutFramework
                 Monitor.Log("If you are a player, you can ignore this. If you are a modder, you added two Walnut Bushes at the same coordinates. If you see a double ID error above, you have two walnuts with the same ID. If you have another mod installed that also uses this Framework, you might share the same ID or Bush with that mod. Please make sure to use the ModID token for the ID and for the Bush, you can simply ignore this. Multiple mods adding the same Bush can happen and no mod should 'own' a Bush position.", LogLevel.Warn);
             }
             
-            if (!disableWalnutCap)
+            if (!DisableWalnutCap.disableWalnutCap)
             {
                 CalculateQiShopWalnuts();
                 int walnutCountBefore = Game1.netWorldState.Value.GoldenWalnuts;
@@ -1239,9 +1238,17 @@ namespace GoldenWalnutFramework
             {
                 e.LoadFrom(() => new List<CustomParrotUpgradePerch>(), AssetLoadPriority.Exclusive);
             }
-            else if (e.Name.IsEquivalentTo("Mods/GoldenWalnutFramework/Settings"))
+            else if (e.Name.IsEquivalentTo("Mods/GoldenWalnutFramework/SpentWalnuts"))
             {
-                e.LoadFrom(() => new Settings(), AssetLoadPriority.Exclusive);
+                e.LoadFrom(() => new Dictionary<string, int>(), AssetLoadPriority.Exclusive);
+            }
+            else if (e.Name.IsEquivalentTo("Mods/GoldenWalnutFramework/DisableSeasonalFeaturesForMaps"))
+            {
+                e.LoadFrom(() => new List<string>(), AssetLoadPriority.Exclusive);
+            }
+            else if (e.Name.IsEquivalentTo("Mods/GoldenWalnutFramework/DisableWalnutCap"))
+            {
+                e.LoadFrom(() => new DisableWalnutCap(), AssetLoadPriority.Exclusive);
             }
             else if (e.Name.IsEquivalentTo("TileSheets/bushes"))
             {
@@ -1395,15 +1402,11 @@ namespace GoldenWalnutFramework
             }
         }
 
-        public void RegisterJSONSettings(Settings settings)
+        public void RegisterJSONSettings()
         {
-            if (settings.DisableWalnutCap == true)
+            if (JSONData.DisableSeasonalFeaturesForMaps != null)
             {
-                m.disableWalnutCap = true;
-            }
-            if (settings.DisableSeasonalFeaturesForMaps != null)
-            {
-                foreach (string map in settings.DisableSeasonalFeaturesForMaps)
+                foreach (string map in JSONData.DisableSeasonalFeaturesForMaps)
                 {
                     m.excludedMapsFromSeasonalFeatures.Add(map!);
                 }
@@ -2005,7 +2008,7 @@ namespace GoldenWalnutFramework
                     Game1.playSound("goldenWalnut");
                 }
             }
-            if (Game1.netWorldState.Value.GoldenWalnutsFound >= 130 && (m.disableWalnutCap == true || Game1.netWorldState.Value.GoldenWalnutsFound < ModEntry.Instance!.GoldenWalnutCap))
+            if (Game1.netWorldState.Value.GoldenWalnutsFound >= 130 && (DisableWalnutCap.disableWalnutCap == true || Game1.netWorldState.Value.GoldenWalnutsFound < ModEntry.Instance!.GoldenWalnutCap))
             {
                 Game1.netWorldState.Value.GoldenWalnuts += stack;
                 Game1.netWorldState.Value.GoldenWalnutsFound += stack;
@@ -2353,7 +2356,7 @@ namespace GoldenWalnutFramework
             }
             Game1.MasterPlayer.mailReceived.Add("gotBirdieReward"); //this fixes a bug from the game
             ((IslandEast)Game1.getLocationFromName("IslandEast")).bananaShrineNutAwarded.Value = true; //this fixes a bug from the game
-            if (m.disableWalnutCap)
+            if (DisableWalnutCap.disableWalnutCap)
             {
                 m.Monitor.Log("DisableWalnutCap has been set to true, therefore your Walnut Count might be weird.", LogLevel.Warn);
             }
@@ -2501,7 +2504,7 @@ namespace GoldenWalnutFramework
 
         public static void ShopMenuConsumeTradeItemHarmony_Prefix(string itemId, int count)
         {
-            if (ModEntry.Instance!.disableWalnutCap) { return; }
+            if (DisableWalnutCap.disableWalnutCap) { return; }
             if (ItemRegistry.QualifyItemId(itemId) == "(O)73" && Game1.activeClickableMenu is ShopMenu shop && shop.ShopId == "QiGemShop")
             {
                 var nuttracker = Game1.player.team.collectedNutTracker;
@@ -2738,14 +2741,23 @@ namespace GoldenWalnutFramework
     {
         public static Dictionary<string, WalnutGroup> GoldenWalnuts { get; private set; } = new();
         public static List<CustomParrotUpgradePerch> ParrotUpgradePerches { get; private set; } = new();
-        public static Settings Settings { get; private set; } = new();
+        public static Dictionary<string, int> SpentWalnuts { get; private set; } = new();
+        public static List<string> DisableSeasonalFeaturesForMaps { get; private set; } = new();
+        public static DisableWalnutCap disableWalnutCap { get; private set; } = new();
 
         public static void LoadFiles()
         {
             GoldenWalnuts = Game1.content.Load<Dictionary<string, WalnutGroup>>("Mods/GoldenWalnutFramework/GoldenWalnuts");
             ParrotUpgradePerches = Game1.content.Load<List<CustomParrotUpgradePerch>>("Mods/GoldenWalnutFramework/ParrotUpgradePerches");
-            Settings = Game1.content.Load<Settings>("Mods/GoldenWalnutFramework/Settings");
+            SpentWalnuts = Game1.content.Load<Dictionary<string, int>>("Mods/GoldenWalnutFramework/SpentWalnuts");
+            DisableSeasonalFeaturesForMaps = Game1.content.Load<List<string>>("Mods/GoldenWalnutFramework/DisableSeasonalFeaturesForMaps");
+            disableWalnutCap = Game1.content.Load<DisableWalnutCap>("Mods/GoldenWalnutFramework/DisableWalnutCap");
         }
+    }
+
+    public class DisableWalnutCap
+    {
+        public static bool disableWalnutCap = false; 
     }
 
 
@@ -2807,14 +2819,6 @@ namespace GoldenWalnutFramework
         public List<string>? StoneTypes { get; set; }
         public string? Singular { get; set; }
         public string? Conditions { get; set; }
-
-    }
-
-    public class Settings
-    {
-        public bool? DisableWalnutCap {  get; set; }
-        public List<string>? DisableSeasonalFeaturesForMaps  { get; set; }
-        public Dictionary<string, int>? SpentWalnuts { get; set; }
 
     }
 }
