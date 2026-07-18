@@ -3,7 +3,7 @@
 ![Bush Ring image](docs/images/Bush_Ring.png)
 
 > ### News
-> Version 2.0.0 of the Golden Walnut Framework has (almost) released and quite a few things have changed. If you were already making a mod using this framework, you have to now target 3 different files instead of 1 (see below at [Setting up your Content Pack](#setting-up-your-content-pack)). The Condition field for PUPs has been renamed [MailConditions](#mailconditions) to avoid confusion with other Conditions fields. The basic structure for Parrot Upgrade perches has also changed a bit (see below at [ParrotUpgradePerches](#parrotupgradeperches)), but besides that, the overall structure is exactly the same. Those are all the structural changes (that should hopefully be the last one). Now for the new stuff. Walnuts will be recalculated each time you load into a save now and there is a walnut debt system now to ensure update consistancy. 1 new token and 1 new console command have been added.
+> Version 2.0.1 of the Golden Walnut Framework has released and quite a few things have changed. If you were already making a mod using this framework, you have to now target 5 different files instead of 1 (see below at [Setting up your Content Pack](#setting-up-your-content-pack)). The Condition field for PUPs has been renamed [MailConditions](#mailconditions) to avoid confusion with other Conditions fields. The basic structure for Parrot Upgrade perches has also changed a bit (see below at [ParrotUpgradePerches](#parrotupgradeperches)), but besides that, the overall structure is exactly the same. Those are all the structural changes (that should hopefully be the last one). Now for the new stuff. Walnuts will be recalculated each time you load into a save now and there is a walnut debt system now to ensure update consistancy. 1 new token and 1 new console command have been added.
 
 
 
@@ -52,10 +52,9 @@ This is a Framework Mod that lets you add custom Golden Walnuts and Parrot Upgra
     * [DestroyAreas](#destroyareas)
     * [FromFile, FromArea, ToArea](#fromfile-fromarea-toarea)
     * [MailConditions](#mailconditions)
-* [Settings](#settings)
-  * [DisableWalnutCap](#disablewalnutcap)
-  * [DisableSeasonalFeaturesForMaps](#disableseasonalfeaturesformaps)
-  * [SpentWalnuts](#spentwalnuts) <- this one is important
+* [DisableWalnutCap](#disablewalnutcap)
+* [DisableSeasonalFeaturesForMaps](#disableseasonalfeaturesformaps)
+* [SpentWalnuts](#spentwalnuts) <- this one is important
 * [Console Commands](#console-commands)
   * [ShowWalnuts](#showwalnuts)
   * [RemoveWalnut](#removewalnut-walnutid)
@@ -92,13 +91,6 @@ This is a Framework Mod that lets you add custom Golden Walnuts and Parrot Upgra
     "Target": "Mods/GoldenWalnutFramework/ParrotUpgradePerches",
     "Entries": {
         //Parrot Upgrade Perches go here
-    }
-},
-{
-    "Action": "EditData",
-    "Target": "Mods/GoldenWalnutFramework/Settings",
-    "Fields": {
-        //Settings go here
     }
 }
 ```
@@ -436,7 +428,7 @@ for (int i = 1; i <= 5; i++)
     }
 }
 ```
-There is one more edge case scenario, that you need to look for. So yet again, if we take the fountain from above as an example. For this fountain, you pay one walnut to gain 5 walnuts. However, this causes issues with the Golden Parrot. When the player just pays the Golden Parrot and gains the 5 Walnuts from the fountain, then the fountain shouldn't be able to get triggered after that (which should be the general approach). But the problem here is, this fountain does not only have 5 custom walnuts, it has also an entry in the [SpentWalnuts](#spentwalnuts) field from the [Settings](#settings). Therefore, there will always be 1 area left where I can spend a walnut, though I cannot trigger that, which will cause the Walnut trade in the Gem Shop to never appear, because I need to prevent the Fountain to work to not overflow the Walnutcount. So, in this specific scenario, when you spend Walnuts to gain Walnuts somewhere, you should simply replace the Walnut drop by another drop, whenever the GoldenParrot has been triggered. The Game kind of does the same thing with Birdie. When you pay the Golden Parrot, you gain all walnuts, including the 5 Walnuts form Birdie, but the Birdie quest can still be completed. In that scenario, you will just get solely the crafting recipe for the fairy dust and not the 5 additional walnuts that she would normally give you. So in any scenario similar to that, you might want to change the drop, just block it and do something else, change the event, I don't know. Just keep in mind what will happen, *after* the player payed the Golden Parrot.
+There is one more edge case scenario, that you need to look for. So yet again, if we take the fountain from above as an example. For this fountain, you pay one walnut to gain 5 walnuts. However, this causes issues with the Golden Parrot. When the player just pays the Golden Parrot and gains the 5 Walnuts from the fountain, then the fountain shouldn't be able to get triggered after that (which should be the general approach). But the problem here is, this fountain does not only have 5 custom walnuts, it has also an entry in the [SpentWalnuts](#spentwalnuts) field. Therefore, there will always be 1 area left where I can spend a walnut, though I cannot trigger that, which will cause the Walnut trade in the Gem Shop to never appear, because I need to prevent the Fountain to work to not overflow the Walnutcount. So, in this specific scenario, when you spend Walnuts to gain Walnuts somewhere, you should simply replace the Walnut drop by another drop, whenever the GoldenParrot has been triggered. The Game kind of does the same thing with Birdie. When you pay the Golden Parrot, you gain all walnuts, including the 5 Walnuts form Birdie, but the Birdie quest can still be completed. In that scenario, you will just get solely the crafting recipe for the fairy dust and not the 5 additional walnuts that she would normally give you. So in any scenario similar to that, you might want to change the drop, just block it and do something else, change the event, I don't know. Just keep in mind what will happen, *after* the player payed the Golden Parrot.
 
 As you can see, I really want to make sure that you do it the right way XD. If you ever need to look up the Walnuts that the player currently has, you can type [ShowWalnuts](#showwalnuts) into the SMAPI console and you get a list of them. The rest is on you. As long as you properly mark the Walnuts as collected in the **NutTracker** and you make sure that even in multiplayer, a walnut cannot accidentally be dropped multiple times (since you wouldn't get any warning or error of any kind for that), everything should be fine. Please also read [SpentWalnuts](#spentwalnuts) below. But even if you mess up and in multiplayer, a walnut is dropped twice by accident, the framework will just recalculate the walnuts after reloading the save, so you don't need to worry too much. Now we are through with all the possible values for the [Type](#type) field. Now we can go on with the other fields.
 
@@ -802,41 +794,49 @@ Unlike the [Conditions](#conditions) field for Walnuts, this field does **NOT** 
 ```Game1.player.team.RequestSetMail(StardewValley.Network.NetEvents.PlayerActionTarget.All, "HereGoesTheMailFlag", StardewValley.Network.NetEvents.MailType.Received, true);```
 But generally, it doesn't cause any problems, if only one player meets those MailConditions and completes the PUP, so you don't have to worry too much.
 
-# Settings
-The third main field, is the Settings field. This is a very simple list that should look like this:
 
+## DisableWalnutCap
+Such a field would look exactly like this:
 ```
 {
     "Action": "EditData",
-    "Target": "Mods/GoldenWalnutFramework/Settings",
-    "Fields": {
-        "DisableWalnutCap": true,
-        "DisableSeasonalFeaturesForMaps": ["Map1", "Map2", ...]
-        "WalnutShops": {
-            "Shop1": 1,
-            "Shop2": 2,
-            ...
-        }
+    "Target": "Mods/GoldenWalnutFramework/DisableWalnutCap",
+    "Entries": {
+        "DisableWalnutCap": true
     }
 }
 ```
-Those are all the Settings that you can set. Note that you use **Fields** instead of **Entries**, since the changes will apply for **every** mod, not just your mod.
-
-## DisableWalnutCap
 So normally, in the vanilla game, there is a hard-coded cap at 130 Walnuts. After having 130 Walnuts, giving the player any more than that will *not* increase the WalnutCounter. For this Framework, instead of completely disabling the Cap, I decided to move the Cap up to the new maximum of Walnuts. But for example, if you want to make Golden Walnuts an infinite resource, you can do this by disabling the Walnut Count. In that case, you also don't have to worry about any entries here at all, since I guess a broken Walnutcount is just part of it, when you make them infinitely obtainable. Keep in mind that this disables the cap for **all** mods that someone has simultaneously installed. You might also want to set this to true when testing stuff. If DisableWalnutCap is set to true, Walnuts will no longer be automatically recalculated.
 
 ## DisableSeasonalFeaturesForMaps
 
 ![Seasonal Bushes](docs/images/Example_Seasonal_Bush.png)
 
-This Framework also provides seasonal variants of the WalnutBush and seasonal variants of Palmtrees. They will automatically apply whenever the current Location does *not* have the `LocationContext` property set to `Island` or `Desert`. If you don't want them to apply, you can enter the Maps in this field. So for example this: `"DisableSeasonalFeaturesForMaps": ["Town", "Mountain"]` would disable the seasonal walnut bush and palm trees for the town and the Mountain, so only their summer variant stays. This is mostly useful when you want to spawn WalnutBushes indoors. This also affects the Pole that the Parrot sticks on, when you assigned the [StickType](#sticktype).
+Example: 
+```
+{
+    "Action": "EditData",
+    "Target": "Mods/GoldenWalnutFramework/DisableSeasonalFeaturesForMaps",
+    "Entries": {
+        "Town": "Town",
+        "Beach": "Beach"
+        ...
+    }
+}
+```
+
+This Framework also provides seasonal variants of the WalnutBush and seasonal variants of Palmtrees. They will automatically apply whenever the current Location does *not* have the `LocationContext` property set to `Island` or `Desert`. If you don't want them to apply, you can enter the Maps in this field. As you can see, you do this by putting the map name on the **left side as well as the right side**. Content Patcher needs this kind of structure, so don't worry, that is just how you do it. This will specifically disable the seasonal walnut bush and palm trees as well as seasonal variants of the Parrot stick, when [StickType](#sticktype) is assigned. This is mostly useful when you want to spawn WalnutBushes indoors and you don't want seasonal bushes.
 
 ## SpentWalnuts
+
 This is mostly C# territory, but still a ***very*** important field. So as of now, the only way to spend walnuts is through a [ParrotUpgradePerch](#parrotupgradeperches). But of course, you can also add custom ways to spend walnuts. Whether it is a shop or for example throwing a Walnut into a fountain, practically anything that reduces the Walnutcounter. This field here lets you register your custom spent walnuts. Here is an example of such an entry:
 ```
-"SpentWalnuts": {
-    "{{ModID}}_GotFountainWalnuts": 3,
-    ...
+{
+    "Action": "EditData",
+    "Target": "Mods/GoldenWalnutFramework/DisableWalnutCap",
+    "Entries": {
+        "{{ModID}}_GotFountainWalnuts": 1
+    }
 }
 ```
 The thing on the left side is the MailFlag that you should give to the Host (MasterPlayer in C#) *after* any player spend x amount of walnuts somewhere. And the amount of walnuts that have been spent is the number on the right side. The MailFlag will also be added to Mr Qis shop as a condition before the Walnut Trade can appear.
@@ -921,7 +921,7 @@ And the UniqueKey from this command is what you can put into the GameStateQuery 
 
 Before, you could use `WORLD_STATE_FIELD GoldenWalnutsFound 130` to check if the player has all, but since this Framework dynamically increases the maximum amount, you can use `FOUND_EVERY_WALNUT` to see if, well, the player found every walnut.
 
-## Tokens
+# Tokens
 This framework also provides a token that you can use. The token looks like this:
 
 `{{ResoNight.IslandExpansion/RemainingWalnutsInGroup:...}}`
@@ -932,6 +932,10 @@ For the `...`, you can either just enter "All", or the [Unique Key](#unique-key)
     "Query: {{ResoNight.GoldenWalnutFramework/RemainingWalnutsInGroup:All}} > 90": true 
 }
 ```
+
+***VERY IMPORTANT***
+
+This token **cannot** be used for any entries for this framework! This token will read out data from the assets provided here and when the framework tries to load an asset, it requests this token's value from Content Patcher, for that my asset needs to be reloaded again and it just creates an endless loop. But Content Patcher seems like it is silently preventing that by disabling the whole EditData entry that contained this token. So if you use this token for any entry for this asset, you will have no error log and your patch will just silently not get applied. So please **only** use this token outside of anything for this framework.
 
 # Example File
 Maybe it is easier for you to understand all the structure if you can see a complete json file. For that reason, I put an example json file into the GoldenWalnutFramework folder, so you can see for yourself, how everything looks like. This is the actually used file for my [Island Expansion](#) mod that also uses all of this Framework.
