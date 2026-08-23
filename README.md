@@ -3,7 +3,7 @@
 ![Bush Ring image](docs/images/Bush_Ring.png)
 
 > ### News
-> Version 2.0.1 of the Golden Walnut Framework has released and quite a few things have changed. If you were already making a mod using this framework, you have to now target 5 different files instead of 1 (see below at [Setting up your Content Pack](#setting-up-your-content-pack)). The Condition field for PUPs has been renamed [MailConditions](#mailconditions) to avoid confusion with other Conditions fields. The basic structure for Parrot Upgrade perches has also changed a bit (see below at [ParrotUpgradePerches](#parrotupgradeperches)), but besides that, the overall structure is exactly the same. Those are all the structural changes (that should hopefully be the last one). Now for the new stuff. Walnuts will be recalculated each time you load into a save now and there is a walnut debt system now to ensure update consistancy. 1 new token and 1 new console command have been added.
+> Added 2 new Console Commands, [CollectEveryCustomWalnut](#collecteverycustomwalnut) and [FastActivateGoldenParrot](#fastactivategoldenparrot) to quickly get all Custom or all Walnuts in general (there is no command to only get all vanilla walnuts if you wonder). You also now get a warning into your console when you added more ways to spend walnuts (mostly Parrot Upgrade Perches) than custom walnuts. So if your mod requires more walnuts than you offer, you get an error.
 
 
 
