@@ -63,6 +63,8 @@ This is a Framework Mod that lets you add custom Golden Walnuts and Parrot Upgra
   * [ShowAllWalnutIDs](#showallwalnutids)
   * [ShowStoneTypeIDs](#showstonetypeids)
   * [ResetQiShopWalnuts](#resetqishopwalnuts)
+  * [CollectEveryCustomWalnut](#collecteverycustomwalnut)
+  * [FastActivateGoldenParrot](#fastactivategoldenparrot)
   * [/recountNuts](#recountnuts)
   * [Other useful Commands](#other-useful-commands)
 * [GameStateQueries](#gamestatequeries)
@@ -886,14 +888,20 @@ This lists you all the MailFlags that the Host (NOT the current player) has (The
 ## RemoveMailFlag (MailFlag)
 This practically lets you remove any MailFlag that the player has. This command exists so you can remove a MailFlag of a completed [ParrotUpgradePerch](#parrotupgradeperches) to practically reset it to be available again. If you use this command on any other MailFlag, I cannot guarantee for anything! You can use [/recountNuts](#recountnuts) after that to regain the spent walnuts and make sure to save the day!
 
-## ResetQiShopWalnuts
-This framework keeps track, how many walnuts you spent at Mr Qi to accurately count the current amount of walnuts (The amount is getting recalculated everytime you load into a save). You can see the amount that have been calculated in the nuttracker. So by using [ShowWalnuts](#showwalnuts), you can find an entry like this: `"BoughtQiGemsForWalnuts_14"`, which means that the player has spent 14 walnuts at the Qi Shop so far. However, sometimes you might want to delete this saved number, which will cause you to regain those 14 walnuts and that is what you can do by using `ResetQiShopWalnuts`. (Your walnuts will also get recalculated after using this command).
-
 ## ShowAllWalnutIDs
 This command lists all the added walnut IDs of all Mods that you have currently installed.
 
 ## ShowStoneTypeIDs
 This is a pretty special command. If you are making a [Stone](#stone) type Walnut, you can also use the field [StoneTypes](#stonetypes). For this field, you need to enter the IDs of the right stones so that you let the right stones drop walnuts. There is no complete list on the wiki for every stone type and it can be quite annoying to find and connect every stone to its id, so by using this command, I just list you all the existing stones and some explanations on where they appear. So this is purely for convenience.
+
+## ResetQiShopWalnuts
+This framework keeps track, how many walnuts you spent at Mr Qi to accurately count the current amount of walnuts (The amount is getting recalculated everytime you load into a save). You can see the amount that have been calculated in the nuttracker. So by using [ShowWalnuts](#showwalnuts), you can find an entry like this: `"BoughtQiGemsForWalnuts_14"`, which means that the player has spent 14 walnuts at the Qi Shop so far. However, sometimes you might want to delete this saved number, which will cause you to regain those 14 walnuts and that is what you can do by using `ResetQiShopWalnuts`. (Your walnuts will also get recalculated after using this command).
+
+## CollectEveryCustomWalnut
+This command will instantly mark every custom walnut that you added as collected and gives them to you. This might be useful for testing things.
+
+## FastActivateGoldenParrot
+This will instantly set the Golden Parrot to activated (without the cost of paying for it), so you can quickly get every walnut. After using this command, you need to go to bed to trigger the normal Golden Parrot cutscene. If you don't want to actually save when going to bed, you can type `debug save` into the console to prevent saving (you will only hear a little soundeffect that sounds like exiting your menu. Use this command like 10 times to get a feeling when saving is being enabled and when it is being disabled). This command gives you every walnut, so if you just want to quickly mark all your walnuts as collected, you might want to use [CollectEveryCustomWalnut](#collecteverycustomwalnut) instead or maybe if you just need walnuts, you can use `debug item 73 x` and for x the amount you need.
 
 ## /recountNuts
 This is actually a vanilla command that you also do not type into the SMAPI console, but into the actual in-game chat. This command recalculates the amount of walnuts that you found in total and that you currently have. This Framework secretly triggers this command after loading into a save, after using [ResetQiShopWalnuts](#resetqishopwalnuts) and after paying the Golden Parrot, but you can also use this command at any time.
