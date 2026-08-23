@@ -41,6 +41,7 @@ namespace GoldenWalnutFramework
         public int vanillaWalnutCount = 0;
         public int currentWalnutCountForShops = 0;
         public int walnutDebt = 0;
+        public int vanillaWalnutBuffer = 14;
         public bool dayIsResetting = true;
         public bool playJingle = false;
         public bool triggeredBridgeOverlayAboveMoneybags = false;
@@ -95,6 +96,8 @@ namespace GoldenWalnutFramework
             helper.ConsoleCommands.Add("RemoveMailFlag", "Lets you remove a Mailflag. Mainly used for resetting ParrotUpgradePerches. Remember to save the day!", cmds.RemoveMailFlag);
             helper.ConsoleCommands.Add("RemoveWalnut", "Lets you remove a walnut, setting it back to it can be collected again. Remember to save the day!", cmds.RemoveWalnut);
             helper.ConsoleCommands.Add("ResetQiShopWalnuts", "This will reset the internal counter for spent walnuts at Mr Qi's Gem Shop back to zero. (Walnuts get recalculated after that)", cmds.ResetQiShopWalnuts);
+            helper.ConsoleCommands.Add("CollectEveryCustomWalnut", "This will mark every custom Walnut as collected and recalculates your walnuts afterwards.", cmds.CollectEveryCustomWalnut);
+            helper.ConsoleCommands.Add("FastActivateGoldenParrot", "This will trigger the Golden Parrot and will give you all Golden Walnuts, after you go to bed. If you do NOT want to save, you can type 'debug save' into the console to prevent saving after going to bed.", cmds.FastActivateGoldenParrot);
 
             GameStateQuery.Register("COMPLETED_WALNUTGROUP", cmds.WalnutGroupGSQ);
             GameStateQuery.Register("FOUND_EVERY_WALNUT", cmds.WalnutCountGSQ);
@@ -959,26 +962,25 @@ namespace GoldenWalnutFramework
             {
                 spendableWalnuts += qiShopFlag.Value;
             }
-            var nuttracker = Game1.player.team.collectedNutTracker;
-            string? boughtEntry = nuttracker.FirstOrDefault(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_"));
-            if (boughtEntry != null)
+            int buffer = additionalGoldenWalnuts - spendableWalnuts;
+            if (buffer < 0)
             {
-                int bought = int.Parse(boughtEntry.Split('_')[1]);
-                int difference = additionalGoldenWalnuts - spendableWalnuts;
-                if (difference < 0)
-                {
-                    Game1.delayedActions.Add(new DelayedAction(200, () => Game1.player.currentLocation.playSound("cancel")));
-                    Game1.hudMessages.Add(new HUDMessage("There are not enough obtainable Walnuts! See the console", 3));
-                    Monitor.Log($"{Math.Abs(difference)} Golden Walnuts are missing to complete every ParrotUpgradePerch and other way to spend Walnuts. If you are a player, you have to give yourself the Walnuts to compensate. But since they get recalculated every time you load into a save, you have to give them to yourself when you actually need to spend them. You do this by typing 'debug item 73 x' into the SMAPI console and for x the amount of total walnuts. If you are a modder, please add more walnuts or remove ParrotUpgradePerches or reduce the amount of walnuts needed to complete them. Also look at every custom way to spend walnuts that you potentially added. Make sure to not softlock the player!", LogLevel.Error);
-                    return;
-                }
-                if (bought > spendableWalnuts)
+                Game1.delayedActions.Add(new DelayedAction(200, () => Game1.player.currentLocation.playSound("cancel")));
+                Game1.hudMessages.Add(new HUDMessage("There are not enough obtainable Walnuts! See the console", 3));
+                Monitor.Log($"{buffer * -1} Golden Walnuts are missing to complete every ParrotUpgradePerch and other way to spend Walnuts. If you are a player, you have to give yourself the Walnuts to compensate. But since they get recalculated every time you load into a save, you have to give them to yourself when you actually need to spend them. You do this by typing 'debug item 73 x' into the SMAPI console and for x the amount of total walnuts. If you are a modder, please add more walnuts or remove ParrotUpgradePerches or reduce the amount of walnuts needed to complete them. Also look at every custom way to spend walnuts that you potentially added. Make sure to not softlock the player!", LogLevel.Error);
+                return;
+            }
+            var nuttracker = Game1.player.team.collectedNutTracker;
+            string? boughtInTracker = nuttracker.FirstOrDefault(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_"));
+            if (boughtInTracker != null)
+            {
+                int bought = int.Parse(boughtInTracker.Split('_')[1]);
+                if (bought > buffer + vanillaWalnutBuffer)
                 {
                     nuttracker.RemoveWhere(walnut => walnut.StartsWith("BoughtQiGemsForWalnuts_"));
-                    nuttracker.Add($"BoughtQiGemsForWalnuts_{spendableWalnuts}");
-                    Game1.netWorldState.Value.GoldenWalnuts += bought - spendableWalnuts;
-                    Game1.hudMessages.Add(new HUDMessage("You gained Qi shop walnuts, read the console", 2));
-                    Monitor.Log("You spent more walnuts at Mr Qi's Gem Shop than you should be able to. This can usually happen after you install an update for any walnut related mod, so don't worry about it", LogLevel.Debug);
+                    Game1.netWorldState.Value.GoldenWalnuts += bought;
+                    Game1.hudMessages.Add(new HUDMessage("You regained Qi shop walnuts, read the console", 2));
+                    Monitor.Log("You spent more walnuts at Mr Qi's Gem Shop than you should be able to. To prevent issues, you regained all the walnuts that you spent there. This can usually happen after you install an update for any walnut related mod, so don't worry about it.", LogLevel.Debug);
                 }
             }
         }
@@ -1948,6 +1950,41 @@ namespace GoldenWalnutFramework
             else
             {
                 m.Monitor.Log("The count of spent walnuts at Mr Qi's Gem Shop is already zero!", LogLevel.Info);
+            }
+        }
+
+        public void CollectEveryCustomWalnut(string command, string[] args)
+        {
+            if (!Context.IsWorldReady) { m.Monitor.Log(LogCommandError, LogLevel.Error); return; }
+
+            foreach (var walnut in MainPatches.CustomWalnuts)
+            {
+                if (walnut.Count > 1)
+                {
+                    for (int i = 1; i <= walnut.Count; i++)
+                    {
+                        Game1.player.team.collectedNutTracker.Add($"{walnut.ID}_{i}");
+                    }
+                }
+                else
+                {
+                    Game1.player.team.collectedNutTracker.Add(walnut.ID);
+                }
+            }
+            Game1.game1.RecountWalnuts();
+        }
+
+        public void FastActivateGoldenParrot(string command, string[] args)
+        {
+            if (!Context.IsWorldReady) { m.Monitor.Log(LogCommandError, LogLevel.Error); return; }
+            if (Game1.netWorldState.Value.ActivatedGoldenParrot == true)
+            {
+                m.Monitor.Log("The Golden Parrot has already been activated!", LogLevel.Warn);
+            }
+            else
+            {
+                m.Monitor.Log("Activated Golden Parrot! Now you need to go to bed to trigger the cutscene. If you DO NOT want to save this change, type 'debug save' into the console to prevent saving anything.", LogLevel.Debug);
+                Game1.Multiplayer.broadcastPartyWideMail("activateGoldenParrotsTonight", Multiplayer.PartyWideMessageQueue.MailForTomorrow, no_letter: true);
             }
         }
 

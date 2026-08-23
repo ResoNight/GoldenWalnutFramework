@@ -832,8 +832,8 @@
                     ],
                     "MailConditions": "{{ModID}}_Visited_Volcano"
                 },
-                "{{ModID}}_Island_W_Added_Stairs": {
-                    "ID": "{{ModID}}_Island_W_Added_Stairs",
+                "{{ModID}}_Island_W_Built_Stairs": {
+                    "ID": "{{ModID}}_Island_W_Built_Stairs",
                     "Location": "IslandWest",
                     "Nuts": 5,
                     "ParrotTile": {
@@ -852,11 +852,11 @@
                         "Width": 6,
                         "Height": 6
                     },
-                    "FromFile": "{{ModID}}\\Maps\\Exp_PUP_Maps",
+                    "FromFile": "{{ModID}}\\Maps\\PUP_GingerIslandStairs",
                     "MailConditions": "{{ModID}}_Visited_Farming_Island"
                 },
-                "{{ModID}}_Island_N_Added_Stairs": {
-                    "ID": "{{ModID}}_Island_N_Added_Stairs",
+                "{{ModID}}_Island_N_Built_Stairs": {
+                    "ID": "{{ModID}}_Island_N_Built_Stairs",
                     "Location": "IslandNorth",
                     "Nuts": 5,
                     "ParrotTile": {
@@ -876,7 +876,7 @@
                         "Width": 6,
                         "Height": 6
                     },
-                    "FromFile": "{{ModID}}\\Maps\\Exp_PUP_Maps",
+                    "FromFile": "{{ModID}}\\Maps\\PUP_GingerIslandStairs",
                     "MailConditions": "{{ModID}}_Visited_Farming_Island"
                 },
                 "{{ModID}}_MS_Island_Repaired_Ship": {
@@ -893,7 +893,7 @@
                         "Width": 18,
                         "Height": 8
                     },
-                    "FromFile": "{{ModID}}\\Maps\\Exp_island_Ship",
+                    "FromFile": "{{ModID}}\\Maps\\PUP_MS_Island_Ship",
                     "FromArea": {
                         "x": 0,
                         "y": 0,
@@ -1038,7 +1038,7 @@
                         "Width": 5,
                         "Height": 2
                     },
-                    "FromFile": "{{ModID}}\\Maps\\Exp_Seasonal_PUP_Maps"
+                    "FromFile": "{{ModID}}\\Maps\\PUP_WaterPaths"
                 },
                 "{{ModID}}_F_Island_Built_StonePathToFountain": {
                     "ID": "{{ModID}}_F_Island_Built_StonePathToFountain",
@@ -1066,31 +1066,31 @@
                         "Width": 6,
                         "Height": 3
                     },
-                    "FromFile": "{{ModID}}\\Maps\\Exp_Seasonal_PUP_Maps"
+                    "FromFile": "{{ModID}}\\Maps\\PUP_WaterPaths"
                 }
             }
         },
         {
             "Action": "EditData",
-            "Target": "Mods/GoldenWalnutFrmaework/SpentWalnuts",
+            "Target": "Mods/GoldenWalnutFramework/SpentWalnuts",
             "Entries": {
                 "{{ModID}}_GotFountainWalnuts": 1
             }
         },
         {
             "Action": "Load",
-            "Target": "{{ModID}}\\Maps\\Exp_PUP_Maps",
-            "FromFile": "assets\\Maps\\Exp_PUP_Maps.tmx"
+            "Target": "{{ModID}}\\Maps\\PUP_GingerIslandStairs",
+            "FromFile": "assets\\Maps\\PUP_GingerIslandStairs.tmx"
         },
         {
             "Action": "Load",
-            "Target": "{{ModID}}\\Maps\\Exp_Seasonal_PUP_Maps",
-            "FromFile": "assets\\Maps\\Exp_Seasonal_PUP_Maps.tmx"
+            "Target": "{{ModID}}\\Maps\\PUP_WaterPaths",
+            "FromFile": "assets\\Maps\\PUP_WaterPaths.tmx"
         },
         {
             "Action": "Load",
-            "Target": "{{ModID}}\\Maps\\Exp_island_Ship",
-            "FromFile": "assets\\Maps\\Exp_island_Ship.tmx"
+            "Target": "{{ModID}}\\Maps\\PUP_MS_Island_Ship",
+            "FromFile": "assets\\Maps\\PUP_MS_Island_Ship.tmx"
         }
     ]
 }
