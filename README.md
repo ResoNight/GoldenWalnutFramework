@@ -3,7 +3,7 @@
 ![Bush Ring image](docs/images/Bush_Ring.png)
 
 > ### News
-> Added 2 new Console Commands, [CollectEveryCustomWalnut](#collecteverycustomwalnut) and [FastActivateGoldenParrot](#fastactivategoldenparrot) to quickly get all Custom or all Walnuts in general (there is no command to only get all vanilla walnuts if you wonder). You also now get a warning into your console when you added more ways to spend walnuts (mostly Parrot Upgrade Perches) than custom walnuts. So if your mod requires more walnuts than you offer, you get an error.
+> 2.0.2 Added 2 new Console Commands, [CollectEveryCustomWalnut](#collecteverycustomwalnut) and [FastActivateGoldenParrot](#fastactivategoldenparrot) to quickly get all Custom or all Walnuts in general (there is no command to only get all vanilla walnuts if you wonder). You also now get a warning into your console when you added more ways to spend walnuts (mostly Parrot Upgrade Perches) than custom walnuts. So if your mod requires more walnuts than you offer, you get an error.
 
 
 
